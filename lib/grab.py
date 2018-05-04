@@ -46,9 +46,11 @@ class Grab:
                 m = pattern.match(str(e.reason))
                 if m:
                     code = m.group(1)
-            if str(code) in codes:
+            if 'code' in vars() and str(code) in codes:
                 restart = False
                 print 'Error Code: %s, URL: %s' % (code, url)
+            else:
+                print e.reason
             if restart:
                 time.sleep(1)
                 cls.get_content(url)
