@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import sys, os, urllib2, threading, time, re
-from pyquery import PyQuery as pq
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
