@@ -68,14 +68,14 @@ class Grab:
             raise GrabError(u"URL不能为空")
         cls.mutex.acquire()
         try:
-            pattern = re.compile(r'.*(bmp|jpg|jpeg|png|gif).*', re.I)
+            pattern = re.compile(r'.*(\.bmp|\.jpg|\.jpeg|\.png|\.gif).*', re.I)
             m = pattern.match(url)
             if m:
                 file_ext = m.group(1)
             folder = os.path.exists(path)
             if not folder or (folder and os.path.isdir(path)):
                 os.makedirs(path)
-            filename = "%s/%s%s" % (path, name, ('.' + file_ext) if file_ext else '')
+            filename = "%s/%s%s" % (path, name, (file_ext) if file_ext else '')
             print filename
             if os.path.isfile(filename) and os.path.exists(filename):
                 print u"%s 已存在" % filename
