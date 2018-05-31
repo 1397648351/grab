@@ -45,7 +45,8 @@ class Novel:
             page = ''
             if m:
                 page = m.group(1)
-            f.write('第%s章 %s\n\r' % (page, title))
+            title = '第%s章 %s' % (page, title)
+            f.write(title + '\n\r')
             f.write(content + '\n\r')
         print title
         self.mutex.release()
