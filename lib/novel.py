@@ -13,8 +13,8 @@ class Novel:
     def __init__(self):
         self.domain = 'https://www.xiashu.la'
         self.url_catalog = 'https://www.xiashu.la/12526/'
-        self.url_page = '/12526/read_1.html'
-        self.novel_name = u'叱咤风云'
+        self.url_page = '/65423/read_1929.html'
+        self.novel_name = u'极品异能学生'
         self.catalog = []
         self.mutex = threading.Lock()
 
@@ -45,7 +45,8 @@ class Novel:
             page = ''
             if m:
                 page = m.group(1)
-            f.write('第%s章 %s\n\r' % (page, title))
+            title = '第%s章 %s' % (page, title)
+            f.write(title + '\n\r')
             f.write(content + '\n\r')
         print title
         self.mutex.release()
