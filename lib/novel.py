@@ -12,17 +12,19 @@ sys.setdefaultencoding("utf-8")
 class Novel:
     def __init__(self):
         self.domain = 'https://www.xiashu.la'
-        self.url_catalog = 'https://www.xiashu.la/12526/'
-        self.url_page = '/65423/read_1929.html'
-        self.novel_name = u'极品异能学生'
+        self.url_catalog = 'https://www.xiashu.la/48758/'
+        self.url_page = '/48758/read_1933.html'
+        self.novel_name = u'修真聊天群'
         self.catalog = []
         self.mutex = threading.Lock()
 
-    def get_chapter(self):
+    def get_chapter(self, url=None):
+        if url is None:
+            url = self.url_page
         try:
-            html = Grab.get_content(self.domain + self.url_page).decode("utf-8", 'ignore')
+            html = Grab.get_content(self.domain + url).decode("utf-8", 'ignore')
         except Exception, e:
-            print self.url_page + e.message
+            print url + e.message
             time.sleep(1)
             self.get_chapter()
             return
@@ -33,9 +35,7 @@ class Novel:
         ele_next = doc('.last a')
         if ele_next.attr('title') != u'没有了':
             self.url_page = doc('.last a').attr('href')
-            self.get_chapter()
-        # for item in ele_catalog:
-        #     print item
+            self.get_chapter(self.url_page)
 
     def write_txt(self, title, content):
         self.mutex.acquire()
@@ -45,8 +45,7 @@ class Novel:
             page = ''
             if m:
                 page = m.group(1)
-            title = '第%s章 %s' % (page, title)
-            f.write(title + '\n\r')
+            f.write('第%s章 %s\n\r' % (page, title))
             f.write(content + '\n\r')
         print title
         self.mutex.release()
