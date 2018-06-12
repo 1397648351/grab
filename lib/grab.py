@@ -52,7 +52,7 @@ class Grab:
                 print e.reason
             if restart:
                 time.sleep(1)
-                cls.get_content(url)
+                return cls.get_content(url)
             else:
                 return None
 
@@ -73,19 +73,20 @@ class Grab:
             if m:
                 file_ext = m.group(1)
             folder = os.path.exists(path)
-            if not folder or (folder and os.path.isdir(path)):
+            if not folder or (folder and not os.path.isdir(path)):
                 os.makedirs(path)
             filename = "%s/%s%s" % (path, name, (file_ext) if file_ext else '')
-            print filename
             if os.path.isfile(filename) and os.path.exists(filename):
-                print u"%s 已存在" % filename
-                return
+                print "%s 已存在" % filename
+                return False
             content = cls.get_content(url)
             if content:
                 with open(filename, 'wb') as f:
                     f.write(content)
+            return True
         except Exception, e:
-            print e.message
+            print '%s %s/%s error:%s' % (url, path, name, str(e))
+            return False
         finally:
             cls.mutex.release()
 
