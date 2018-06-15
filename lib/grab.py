@@ -8,9 +8,18 @@ sys.setdefaultencoding('utf-8')
 
 class Grab:
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36',
+        'Accept-Ranges': "bytes",
+        'Content-Type': 'text/html',
+        'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+        # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36',
+        # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:60.0) Gecko/20100101 Firefox/60.0',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299',
         'Cache-Control': 'max-age=0',
-        'Pragma': 'no-cache'}
+        # 'Pragma': 'no-cache'
+    }
     timeout = 30
     mutex = threading.RLock()  # 创建锁
 

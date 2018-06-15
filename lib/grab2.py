@@ -2,6 +2,7 @@
 
 import sys, os, urllib2, threading, time, re
 from selenium import webdriver
+from pyquery import PyQuery as pq
 
 from selenium.common.exceptions import NoSuchElementException
 
@@ -10,6 +11,8 @@ sys.setdefaultencoding('utf-8')
 
 
 class Grab2:
+    driver = webdriver.Firefox()
+
     def __init__(self, url):
         """
         Grab init
@@ -19,11 +22,30 @@ class Grab2:
 
     @classmethod
     def open_content(cls, url):
-        browser = webdriver.Firefox()
-        browser.implicitly_wait(10)  # seconds
-        browser.get(url)
-
-        print "1"
+        try:
+            cls.driver.get(url)
+            element = cls.driver.find_element_by_id("yc")
+            element.click()
+            element = cls.driver.find_element_by_id("zkzj")
+            while element.text != '点击关闭':
+                time.sleep(0.1)
+            html = cls.driver.page_source.decode('utf-8', 'ignore')
+            doc = pq(html)
+            list_chapter = doc('#detaillist ul li').items()
+            chapters = []
+            index = 0
+            for chapter in list_chapter:
+                index = index + 1
+                title = chapter('a').text()
+                href = chapter('a').attr('href')
+                chapters.append({
+                    'index': index,
+                    'title': title,
+                    'href': href
+                })
+            print chapters[0]['title']
+        finally:
+            cls.driver.close()
 
     @classmethod
     def pull_down(cls, driver, ele):
