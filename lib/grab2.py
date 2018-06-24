@@ -11,7 +11,7 @@ sys.setdefaultencoding('utf-8')
 
 
 class Grab2:
-    driver = webdriver.Firefox()
+    driver = None
 
     def __init__(self, url):
         """
@@ -20,9 +20,11 @@ class Grab2:
         """
         self.url = url
 
+
     @classmethod
     def open_content(cls, url):
         try:
+            cls.driver = webdriver.Edge
             cls.driver.get(url)
             element = cls.driver.find_element_by_id("yc")
             element.click()
