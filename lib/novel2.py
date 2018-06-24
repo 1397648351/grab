@@ -23,21 +23,9 @@ class Novel2:
         self.domain = 'https://www.xiashu.la'
         self.url_page = 'https://www.xiashu.la/191565/'
         self.bookname = u'都市奇门医圣'
+        self.info = ''
+        self.book = {}
         self.chapters = []
-
-    def get_chapter_content(self, index, url=None):
-        if url is None:
-            url = self.url_page
-        try:
-            html = Grab.get_content(self.domain + url).decode("utf-8", 'ignore')
-        except Exception, e:
-            print url + e.message
-            time.sleep(1)
-            self.get_chapter_content(index, url)
-            return
-        print self.chapters[index]["title"]
-        doc = pq(html)
-        self.chapters[index]["content"] = doc('#chaptercontent').html()
 
     def get_chapters(self, url=None):
         try:
@@ -63,10 +51,23 @@ class Novel2:
                     'href': href
                 })
             self.create_thread()
-            for chapter in self.chapters:
-                print chapter['title']
+            self.save_files()
         finally:
             self.driver.close()
+
+    def get_chapter_content(self, index, url=None):
+        if url is None:
+            url = self.url_page
+        try:
+            html = Grab.get_content(self.domain + url).decode("utf-8", 'ignore')
+        except Exception, e:
+            print url + e.message
+            time.sleep(1)
+            self.get_chapter_content(index, url)
+            return
+        print self.chapters[index]["title"]
+        doc = pq(html)
+        self.chapters[index]["content"] = doc('#chaptercontent').html()
 
     def create_thread(self):
         threads = []
@@ -83,4 +84,13 @@ class Novel2:
         del threads[:]
 
     def save_files(self):
-        print 'start'
+        self.book['page'] = '<?xml version="1.0" encoding="utf-8" standalone="no"?>' \
+                            '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">' \
+                            '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN">' \
+                            '<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>' \
+                            '<title>书籍信息</title><head><body><div><h1>' + self.bookname + '</h1></div></body></html>'
+        self.book['content'] = ''
+        self.book['toc'] = '<?xml version="1.0" encoding="utf-8"?>' \
+                           '<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">'
+        for chapter in self.chapters:
+            print chapter['title']
