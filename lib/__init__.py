@@ -1,1 +1,1 @@
-__all__ = ['grab', 'db', 'collect', 'novel', 'xmlanalysis']
+__all__ = ['grab', 'db', 'collect', 'novel_txt', 'novel_epub', 'xmlanalysis']

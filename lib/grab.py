@@ -1,19 +1,25 @@
 # -*- coding: utf-8 -*-
 
-import sys, os, urllib2, threading, time, re
+import sys, os, urllib2, threading, time, re, random
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
 class Grab:
+    user_agent = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:60.0) Gecko/20100101 Firefox/60.0']
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36',
-        # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:60.0) Gecko/20100101 Firefox/60.0',
-        # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299',
+        'User-Agent': user_agent[0],
         'Cache-Control': 'max-age=0',
         'Pragma': 'no-cache'
     }
+    proxy_info = {
+        'host': '115.223.205.157',
+        'port': 9000
+    }
+    use_proxy = True
     timeout = 30
     mutex = threading.RLock()  # 创建锁
 
@@ -33,6 +39,15 @@ class Grab:
         """
         if not url:
             raise GrabError(u"URL不能为空")
+        if cls.use_proxy:
+            # We create a handler for the proxy
+            proxy_support = urllib2.ProxyHandler({"http": "http://%(host)s:%(port)d" % cls.proxy_info})
+            # We create an opener which uses this handler:
+            opener = urllib2.build_opener(proxy_support)
+            # Then we install this opener as the default opener for urllib2:
+            urllib2.install_opener(opener)
+        index = random.randint(0, len(cls.user_agent))
+        cls.headers['User-Agent'] = cls.user_agent[index]
         request = urllib2.Request(url, headers=cls.headers)
         try:
             response = urllib2.urlopen(request, timeout=cls.timeout)
