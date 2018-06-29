@@ -19,7 +19,7 @@ class Grab:
         'host': '115.223.205.157',
         'port': 9000
     }
-    use_proxy = True
+    use_proxy = False
     timeout = 30
     mutex = threading.RLock()  # 创建锁
 
@@ -46,7 +46,7 @@ class Grab:
             opener = urllib2.build_opener(proxy_support)
             # Then we install this opener as the default opener for urllib2:
             urllib2.install_opener(opener)
-        index = random.randint(0, len(cls.user_agent))
+        index = random.randint(0, len(cls.user_agent) - 1)
         cls.headers['User-Agent'] = cls.user_agent[index]
         request = urllib2.Request(url, headers=cls.headers)
         try:

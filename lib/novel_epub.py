@@ -34,7 +34,7 @@ class Novel:
     def get_chapters(self, url=None):
         if not url:
             url = self.url_page
-        driver = webdriver.Firefox()
+        driver = webdriver.Chrome()
         try:
             driver.get(url)
             element = driver.find_element_by_id("yc")
@@ -43,8 +43,10 @@ class Novel:
             while element.text != '点击关闭':
                 time.sleep(0.1)
             html = driver.page_source.decode('utf-8', 'ignore')
-        except:
-            print 'error!'
+            html = html.replace('xmlns="http://www.w3.org/1999/xhtml"', '')
+        except Exception, ex:
+            print 'error!', '\n', str(ex)
+            return
         finally:
             driver.quit()
         doc = pq(html)
@@ -121,6 +123,7 @@ class Novel:
         self.mutex.acquire()
         print self.chapters[index]["title"]
         self.mutex.release()
+        html = html.replace('xmlns="http://www.w3.org/1999/xhtml"', '')
         doc = pq(html)
         self.create_chapter(index, doc('#chaptercontent').html())
 
