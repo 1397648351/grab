@@ -21,7 +21,6 @@
             list-style-type: none;
             margin: 0;
             padding: 0;
-            line-height: 2.5em;
             font-size: 0.8em
         }
 
@@ -41,12 +40,26 @@
         .copyright {
             color: #ff4500
         }
+
+        .introduction {
+            margin-top: 2.5em;
+        }
+
+        .introduction p {
+            line-height: 1.5em;
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
 <div>
     <h1>__BOOKNAME__</h1>
-    <ul>『内容简介：__INTRODUCTION__』</ul>
+    <h2>作者：__CREATOR__</h2>
+    <div class="introduction">
+        <p>
+            <b>内容简介：</b>__INTRODUCTION__
+        </p>
+    </div>
 </div>
 </body>
 </html>

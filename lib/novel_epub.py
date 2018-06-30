@@ -16,56 +16,115 @@ sys.setdefaultencoding('utf-8')
 
 
 class Novel:
-    def __init__(self):
+    SEARCH_ID = 0
+    SEARCH_NAME = 1
+    NORMAL = 0
+    REDOWNLOAD = 1
+
+    def __init__(self, book, mode=SEARCH_ID, type=NORMAL):
         self.version = '1.0'
         self.mutex = threading.Lock()
-
-        self.bookid = "146539"
+        self.coexist = 7
+        self.driver = None
+        self.type = type
         self.domain = 'https://www.xiashu.la'
-        self.url_page = 'https://www.xiashu.la/%s/' % self.bookid
+        self.url_page = ''
+        self.bookid = ''
         self.bookname = ''
         self.introduction = ""
-        self.path = ''
+        self.creator = ""
+        self.path = 'file/novel'
         self.info = ''
         self.book = {}
         self.chapters = []
-        self.str_replace = []
+        self.str_replace = [
+            '一秒记住【棉花糖小说网mianhuatang.la】，为您提供精彩小说阅读。',
+            '一秒记住【谷♂粒÷小÷说→网 xinguli】，更新快，无弹窗，免费读！',
+            '一秒记住【谷♂粒÷网 xinguli】，精彩小说无弹窗免费阅读！',
+            'c_t;', 'reads;', '（ 广告）', '( $&gt;&gt;&gt;棉、花‘糖’小‘說’)',
+            '( $>>>棉、花‘糖’小‘說’)', '( )', '（ ）', '[ ]', '（ 棉花糖', '( ’)',
+            '[看本书最新章节请到]', '[更新快，网站页面清爽，广告少，，最喜欢这种网站了，一定要好评]',
+            '其c他都5是w盗版0`', '天才壹秒記住愛♂去÷小說→網，為您提供精彩小說閱讀。',
+            '~搜搜篮色，即可全文阅读后面章节', '-79-', '-79xs-',
+            '最新章节全文阅读。更多最新章节访问:ww 。', '。 更新好快。',
+            '最新章节全文阅读', '。更多最新章节访问:ww 。', 'ＷｗΔＷ．『ksnhuge『ge．La',
+            '[想看的书几乎都有啊，比一般的站要稳定很多更新还快，全文字的没有广告。]'
+        ]
+        if mode == self.SEARCH_ID:
+            self.bookid = book
+            self.url_page = 'https://www.xiashu.la/%s/' % self.bookid
+            self.get_chapters()
+        else:
+            self.get_book(book)
+
+    def get_book(self, bookname):
+        self.driver = webdriver.Chrome()
+        try:
+            self.driver.get(self.domain)
+            input = self.driver.find_element_by_id("shuming")
+            input.send_keys(bookname)
+            submit = self.driver.find_element_by_id("submitbtn")
+            submit.click()
+            html = self.driver.page_source.decode('utf-8', 'ignore')
+            html = html.replace('xmlns="http://www.w3.org/1999/xhtml"', '')
+            doc = pq(html)
+            link = doc('#waterfall .item.masonry-brick')
+            if len(link) > 0:
+                link = link.eq(0).find('.title h3 a')
+                self.bookname = link.text().strip()
+                if bookname != self.bookname:
+                    self.driver.quit()
+                    print u'未找到该书籍《%s》' % bookname
+                    return
+                self.bookid = link.attr('href').replace("/api/ajax/searchid.php?id=", '')
+                self.url_page = 'https://www.xiashu.la/%s/' % self.bookid
+                self.get_chapters()
+        except Exception, ex:
+            self.driver.quit()
+            print 'error!', '\n', str(ex)
+            return
 
     def get_chapters(self, url=None):
         if not url:
             url = self.url_page
-        driver = webdriver.Chrome()
+        if not self.driver:
+            self.driver = webdriver.Chrome()
         try:
-            driver.get(url)
-            element = driver.find_element_by_id("yc")
+            self.driver.get(url)
+            element = self.driver.find_element_by_id("yc")
             element.click()
-            element = driver.find_element_by_id("zkzj")
+            element = self.driver.find_element_by_id("zkzj")
             while element.text != '点击关闭':
                 time.sleep(0.1)
-            html = driver.page_source.decode('utf-8', 'ignore')
+            html = self.driver.page_source.decode('utf-8', 'ignore')
             html = html.replace('xmlns="http://www.w3.org/1999/xhtml"', '')
         except Exception, ex:
             print 'error!', '\n', str(ex)
             return
         finally:
-            driver.quit()
+            self.driver.quit()
+        self.get_bookinfo(html)
+        self.create_thread()
+        self.save_files()
+
+    def get_bookinfo(self, html):
         doc = pq(html)
         doc('#aboutbook a.fr').remove()
         doc('#aboutbook h3').remove()
         introduction = doc('#aboutbook').html()
         self.bookname = doc('#info .infotitle h1').text().replace(u'《', '').replace(u'》', '').strip()
+        self.creator = doc(".ainfo .username a").text().strip()
         if not self.bookname:
             raise Exception('抓取网页失败！')
-        self.path = 'file/' + self.bookname
         print "《%s》开始抓取" % self.bookname
         self.create_path()
         list = introduction.split('<br/>')
         for item in list:
             if not item:
                 continue
-            self.introduction = self.introduction + '<li>' + item.strip() + '</li>'
+            self.introduction += item.strip() + '<br/>'
         cover = doc('#picbox .img_in img').attr('src')
-        Grab.download_image(cover, self.path, 'cover')
+        Grab.download_image(cover, '%s/%s' % (self.path, self.bookname), 'cover')
         list_chapter = doc('#detaillist ul li').items()
         index = 0
         for chapter in list_chapter:
@@ -77,26 +136,29 @@ class Novel:
                 'title': title,
                 'href': href
             })
-        self.create_thread()
-        self.save_files()
 
     def create_path(self):
-        folder = os.path.exists('file/%s.epub' % self.bookname)
+        folder = os.path.exists('%s/%s.epub' % (self.path, self.bookname))
         if folder:
-            if not os.path.exists(self.path):
-                shutil.copy('file/%s.epub' % self.bookname, 'file/temp.epub')
-                with zipfile.ZipFile('file/temp.epub') as file:
-                    file.extractall(self.path)
-                    os.remove(os.path.join(self.path, 'mimetype'))
-                os.remove('file/temp.epub')
-        folder = os.path.exists(self.path)
+            if self.type == self.REDOWNLOAD:
+                os.remove('%s/%s.epub' % (self.path, self.bookname))
+                if os.path.exists('%s/%s' % (self.path, self.bookname)):
+                    shutil.rmtree('%s/%s' % (self.path, self.bookname))
+            else:
+                if not os.path.exists('%s/%s' % (self.path, self.bookname)):
+                    shutil.copy('%s/%s.epub' % (self.path, self.bookname), '%s/temp.epub' % self.path)
+                    with zipfile.ZipFile('%s/temp.epub' % self.path) as file:
+                        file.extractall('%s/%s' % (self.path, self.bookname))
+                        os.remove(os.path.join(self.path, self.bookname, 'mimetype'))
+                    os.remove('%s/temp.epub' % self.path)
+        folder = os.path.exists('%s/%s' % (self.path, self.bookname))
         if not folder:
-            os.makedirs(self.path)
-        folder = os.path.exists(self.path + '/META-INF')
+            os.makedirs('%s/%s' % (self.path, self.bookname))
+        folder = os.path.exists('%s/%s/META-INF' % (self.path, self.bookname))
         if not folder:
-            os.makedirs(self.path + '/META-INF')
-        shutil.copyfile("epub/container.xml", self.path + "/META-INF/container.xml")
-        shutil.copyfile("epub/stylesheet.css", self.path + "/stylesheet.css")
+            os.makedirs('%s/%s/META-INF' % (self.path, self.bookname))
+        shutil.copyfile("epub/container.xml", "%s/%s/META-INF/container.xml" % (self.path, self.bookname))
+        shutil.copyfile("epub/stylesheet.css", "%s/%s/stylesheet.css" % (self.path, self.bookname))
 
     def get_chapter_content(self, index, url=None):
         if url is None:
@@ -104,15 +166,15 @@ class Novel:
         try:
             file_name = '%05d' % (index + 1)
             file_name = 'chapter_' + file_name + '.xhtml'
-            folder = os.path.exists(self.path + '/' + file_name)
+            folder = os.path.exists('%s/%s/%s' % (self.path, self.bookname, file_name))
             if folder:
                 self.mutex.acquire()
                 print self.chapters[index]["title"] + '  已存在！'
                 self.mutex.release()
                 return
-            self.mutex.acquire()
+            # self.mutex.acquire()
             html = Grab.get_content(self.domain + url).decode("utf-8", 'ignore')
-            self.mutex.release()
+            # self.mutex.release()
         except Exception, e:
             self.mutex.acquire()
             print url + e.message
@@ -120,9 +182,6 @@ class Novel:
             time.sleep(1)
             self.get_chapter_content(index, url)
             return
-        self.mutex.acquire()
-        print self.chapters[index]["title"]
-        self.mutex.release()
         html = html.replace('xmlns="http://www.w3.org/1999/xhtml"', '')
         doc = pq(html)
         self.create_chapter(index, doc('#chaptercontent').html())
@@ -133,7 +192,7 @@ class Novel:
             th = threading.Thread(target=self.get_chapter_content, args=(chapter['index'] - 1, chapter['href'],))
             th.start()
             threads.append(th)
-            if len(threads) >= 5:
+            if len(threads) >= self.coexist:
                 for _th in threads:
                     _th.join()
                 del threads[:]
@@ -161,21 +220,22 @@ class Novel:
             content_toc = content_toc + '<content src="' + name + '.xhtml"/></navPoint>'
             content_opf_1 = content_opf_1 + '<item href="' + name + '.xhtml" id="id' + _name + '" media-type="application/xhtml+xml"/>'
             content_opf_2 = content_opf_2 + '<itemref idref="id' + _name + '"/>'
-        file_name = self.path + '/catalog.xhtml'
+        file_name = '%s/%s/catalog.xhtml' % (self.path, self.bookname)
         with open('epub/temp_catalog.xhtml', 'r') as f:
             content = f.read().replace('__CONTENT__', content)
         with open(file_name, 'w') as f:
             f.write(content)
-        file_name = self.path + '/toc.ncx'
+        file_name = '%s/%s/toc.ncx' % (self.path, self.bookname)
         with open('epub/temp_toc.ncx', 'r') as f:
             content_toc = f.read().replace('__CONTENT__', content_toc).replace('__TIME__', id).replace(
-                '__CREATOR__', "WZ").replace('__BOOKNAME__', self.bookname)
+                '__CREATOR__', self.creator).replace('__BOOKNAME__', self.bookname)
         with open(file_name, 'w') as f:
             f.write(content_toc)
-        file_name = self.path + '/content.opf'
+        file_name = '%s/%s/content.opf' % (self.path, self.bookname)
         with open('epub/temp_content.opf', 'r') as f:
             content_opf = f.read()
-            content_opf = content_opf.replace('__BOOKNAME__', self.bookname).replace('__CREATOR__', "WZ").replace(
+            content_opf = content_opf.replace('__BOOKNAME__', self.bookname).replace('__CREATOR__',
+                                                                                     self.creator).replace(
                 '__TIME__', id).replace('__CONTENT1__', content_opf_1).replace('__CONTENT2__', content_opf_2)
         with open(file_name, 'w') as f:
             f.write(content_opf)
@@ -183,17 +243,19 @@ class Novel:
     def create_page(self):
         with open('epub/temp_page.xhtml', 'r') as f:
             content = f.read()
-        content = content.replace('__BOOKNAME__', self.bookname).replace('__INTRODUCTION__', self.introduction)
-        file_name = self.path + '/page.xhtml'
+        content = content.replace('__BOOKNAME__', self.bookname).replace(
+            '__INTRODUCTION__', self.introduction).replace('__CREATOR__', self.creator)
+        file_name = '%s/%s/page.xhtml' % (self.path, self.bookname)
         with open(file_name, 'w') as f:
             f.write(content)
 
     def create_chapter(self, index, content):
         file_name = '%05d' % (index + 1)
         file_name = 'chapter_' + file_name + '.xhtml'
-        folder = os.path.exists(self.path + '/' + file_name)
+        folder = os.path.exists('%s/%s/%s' % (self.path, self.bookname, file_name))
         if folder:
             return
+        content = content.replace(self.chapters[index]['title'], '')
         for item in self.str_replace:
             content = content.replace(item, '')
         list = content.split('<br/>')
@@ -204,15 +266,19 @@ class Novel:
             contents = contents + '<p>' + item.strip() + '</p>'
         with open('epub/temp_chapter.xhtml', 'r') as f:
             contents = f.read().replace('__CONTENT__', contents).replace('__TITLE__', self.chapters[index]['title'])
-        with open(self.path + '/' + file_name, 'w') as f:
+        with open('%s/%s/%s' % (self.path, self.bookname, file_name), 'w') as f:
             f.write(contents)
+        self.mutex.acquire()
+        print self.bookname, self.chapters[index]["title"]
+        self.mutex.release()
 
     def save_epub(self):
-        folder = os.path.exists('file/%s.epub' % self.bookname)
+        folder = os.path.exists('%s/%s.epub' % (self.path, self.bookname))
         if folder:
-            os.remove('file/%s.epub' % self.bookname)
-        shutil.make_archive('file/%s' % self.bookname, 'zip', self.path)
-        os.rename('file/%s.zip' % self.bookname, 'file/%s.epub' % self.bookname)
-        with zipfile.ZipFile('file/%s.epub' % self.bookname, 'a') as file:
+            os.remove('%s/%s.epub' % (self.path, self.bookname))
+        shutil.make_archive('%s/%s' % (self.path, self.bookname), 'zip', '%s/%s' % (self.path, self.bookname))
+        os.rename('%s/%s.zip' % (self.path, self.bookname), '%s/%s.epub' % (self.path, self.bookname))
+        with zipfile.ZipFile('%s/%s.epub' % (self.path, self.bookname), 'a') as file:
             file.write('epub/mimetype', 'mimetype')
-        shutil.rmtree(self.path)  # 递归删除文件夹
+        shutil.rmtree('%s/%s' % (self.path, self.bookname))  # 递归删除文件夹
+        print self.bookname + '.epub 完成'
