@@ -3,7 +3,7 @@ body{
  font-size: 1.0em;word-wrap:break-word;
 }
 ul,li{list-style-type:none;margin:0;padding:0;}
-p{text-indent:2em; line-height:1.5em; margin-top:0; margin-bottom:1em;}
+p{text-indent:2em; line-height:1.8em; margin-top:0; margin-bottom:1em;}
 .catalog{padding: 1.5em 0;font-size: 0.8em;}
 li{border-bottom: 1px solid #D5D5D5;}
 h1{font-size:1.6em; font-weight:bold;}

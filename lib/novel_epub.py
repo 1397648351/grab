@@ -24,7 +24,7 @@ class Novel:
     def __init__(self, book, mode=SEARCH_ID, type=NORMAL):
         self.version = '1.0'
         self.mutex = threading.Lock()
-        self.coexist = 7
+        self.coexist = 5
         self.driver = None
         self.type = type
         self.domain = 'https://www.xiashu.la'
@@ -48,7 +48,8 @@ class Novel:
             '~搜搜篮色，即可全文阅读后面章节', '-79-', '-79xs-',
             '最新章节全文阅读。更多最新章节访问:ww 。', '。 更新好快。',
             '最新章节全文阅读', '。更多最新章节访问:ww 。', 'ＷｗΔＷ．『ksnhuge『ge．La',
-            '[想看的书几乎都有啊，比一般的站要稳定很多更新还快，全文字的没有广告。]'
+            '[想看的书几乎都有啊，比一般的站要稳定很多更新还快，全文字的没有广告。]',
+            '恋上你看书网 630bookla ，最快更新神豪无极限最新章节！'
         ]
         if mode == self.SEARCH_ID:
             self.bookid = book
@@ -128,9 +129,11 @@ class Novel:
         list_chapter = doc('#detaillist ul li').items()
         index = 0
         for chapter in list_chapter:
-            index = index + 1
             title = chapter('a').text()
             href = chapter('a').attr('href')
+            if not title or not href:
+                continue
+            index = index + 1
             self.chapters.append({
                 'index': index,
                 'title': title,
@@ -139,18 +142,19 @@ class Novel:
 
     def create_path(self):
         folder = os.path.exists('%s/%s.epub' % (self.path, self.bookname))
-        if folder:
-            if self.type == self.REDOWNLOAD:
+        if self.type == self.REDOWNLOAD:
+            if folder:
                 os.remove('%s/%s.epub' % (self.path, self.bookname))
-                if os.path.exists('%s/%s' % (self.path, self.bookname)):
-                    shutil.rmtree('%s/%s' % (self.path, self.bookname))
-            else:
-                if not os.path.exists('%s/%s' % (self.path, self.bookname)):
-                    shutil.copy('%s/%s.epub' % (self.path, self.bookname), '%s/temp.epub' % self.path)
-                    with zipfile.ZipFile('%s/temp.epub' % self.path) as file:
-                        file.extractall('%s/%s' % (self.path, self.bookname))
-                        os.remove(os.path.join(self.path, self.bookname, 'mimetype'))
-                    os.remove('%s/temp.epub' % self.path)
+                folder = False
+            if os.path.exists('%s/%s' % (self.path, self.bookname)):
+                shutil.rmtree('%s/%s' % (self.path, self.bookname))
+        if folder:
+            if not os.path.exists('%s/%s' % (self.path, self.bookname)):
+                shutil.copy('%s/%s.epub' % (self.path, self.bookname), '%s/temp.epub' % self.path)
+                with zipfile.ZipFile('%s/temp.epub' % self.path) as file:
+                    file.extractall('%s/%s' % (self.path, self.bookname))
+                    os.remove(os.path.join(self.path, self.bookname, 'mimetype'))
+                os.remove('%s/temp.epub' % self.path)
         folder = os.path.exists('%s/%s' % (self.path, self.bookname))
         if not folder:
             os.makedirs('%s/%s' % (self.path, self.bookname))
@@ -269,7 +273,7 @@ class Novel:
         with open('%s/%s/%s' % (self.path, self.bookname, file_name), 'w') as f:
             f.write(contents)
         self.mutex.acquire()
-        print self.bookname, self.chapters[index]["title"]
+        print self.bookname, '%d/%d' % (index + 1, len(self.chapters)), self.chapters[index]["title"]
         self.mutex.release()
 
     def save_epub(self):
