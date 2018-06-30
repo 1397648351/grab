@@ -259,7 +259,8 @@ class Novel:
         folder = os.path.exists('%s/%s/%s' % (self.path, self.bookname, file_name))
         if folder:
             return
-        content = content.replace(self.chapters[index]['title'], '')
+        content = content.replace(self.chapters[index]['title'], '').replace(
+            self.chapters[index]['title'].replace(' ', ''))
         for item in self.str_replace:
             content = content.replace(item, '')
         list = content.split('<br/>')
