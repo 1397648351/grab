@@ -45,7 +45,7 @@ class Novel:
             '( $>>>棉、花‘糖’小‘說’)', '( )', '（ ）', '[ ]', '（ 棉花糖', '( ’)',
             '[看本书最新章节请到]', '[更新快，网站页面清爽，广告少，，最喜欢这种网站了，一定要好评]',
             '其c他都5是w盗版0`', '天才壹秒記住愛♂去÷小說→網，為您提供精彩小說閱讀。',
-            '~搜搜篮色，即可全文阅读后面章节', '-79-', '-79xs-',
+            '~搜搜篮色，即可全文阅读后面章节', '-79-', '-79xs-', '&amp;nnsp;',
             '最新章节全文阅读。更多最新章节访问:ww 。', '。 更新好快。',
             '最新章节全文阅读', '。更多最新章节访问:ww 。', 'ＷｗΔＷ．『ksnhuge『ge．La',
             '[想看的书几乎都有啊，比一般的站要稳定很多更新还快，全文字的没有广告。]',
@@ -260,7 +260,7 @@ class Novel:
         if folder:
             return
         content = content.replace(self.chapters[index]['title'], '').replace(
-            self.chapters[index]['title'].replace(' ', ''))
+            self.chapters[index]['title'].replace(' ', ''), '')
         for item in self.str_replace:
             content = content.replace(item, '')
         list = content.split('<br/>')

@@ -9,11 +9,11 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 
 if __name__ == "__main__":
-    novels = [u'异常生物见闻录']
+    novels = [u'修罗武神']
     engine = pyttsx.init()
     engine.say('开始')
     engine.runAndWait()
     for novel in novels:
-        ss = Novel(novel, 1, 0)
+        ss = Novel(novel, 1, 1)
     engine.say('结束')
     engine.runAndWait()
