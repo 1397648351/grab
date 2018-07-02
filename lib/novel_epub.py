@@ -117,6 +117,7 @@ class Novel:
         self.creator = doc(".ainfo .username a").text().strip()
         if not self.bookname:
             raise Exception('抓取网页失败！')
+        self.str_replace.append('恋上你看书网 630bookla ，最快更新%s最新章节！' % self.bookname)
         print "《%s》开始抓取" % self.bookname
         self.create_path()
         list = introduction.split('<br/>')
