@@ -19,17 +19,17 @@ class Novel:
     Search_ID = 0
     Search_Name = 1
     Normal = 0
-    ReDownlaod = 1
+    ReDownload = 1
     Chrome = 0
     FireFox = 1
 
-    def __init__(self, book, mode=Search_ID, type=Normal):
+    def __init__(self, book, mode=Search_ID, download_mode=Normal):
         self.version = '1.0'
         self.mutex = threading.Lock()
         self.coexist = 5
         self.driverName = self.Chrome
         self.driver = None
-        self.type = type
+        self.type = download_mode
         self.domain = 'https://www.xiashu.la'
         self.url_page = ''
         self.bookid = ''
@@ -156,7 +156,7 @@ class Novel:
 
     def create_path(self):
         folder = os.path.exists('%s/%s.epub' % (self.path, self.bookname))
-        if self.type == self.ReDownlaod:
+        if self.type == self.ReDownload:
             if folder:
                 os.remove('%s/%s.epub' % (self.path, self.bookname))
                 folder = False
