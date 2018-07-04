@@ -16,14 +16,14 @@ sys.setdefaultencoding('utf-8')
 
 
 class Novel:
-    SEARCH_ID = 0
-    SEARCH_NAME = 1
-    NORMAL = 0
-    REDOWNLOAD = 1
+    Search_ID = 0
+    Search_Name = 1
+    Normal = 0
+    ReDownlaod = 1
     Chrome = 0
     FireFox = 1
 
-    def __init__(self, book, mode=SEARCH_ID, type=NORMAL):
+    def __init__(self, book, mode=Search_ID, type=Normal):
         self.version = '1.0'
         self.mutex = threading.Lock()
         self.coexist = 5
@@ -54,7 +54,7 @@ class Novel:
             '[想看的书几乎都有啊，比一般的站要稳定很多更新还快，全文字的没有广告。]',
             '恋上你看书网 630bookla ，最快更新神豪无极限最新章节！'
         ]
-        if mode == self.SEARCH_ID:
+        if mode == self.Search_ID:
             self.bookid = book
             self.url_page = 'https://www.xiashu.la/%s/' % self.bookid
             self.get_chapters()
@@ -156,7 +156,7 @@ class Novel:
 
     def create_path(self):
         folder = os.path.exists('%s/%s.epub' % (self.path, self.bookname))
-        if self.type == self.REDOWNLOAD:
+        if self.type == self.ReDownlaod:
             if folder:
                 os.remove('%s/%s.epub' % (self.path, self.bookname))
                 folder = False
