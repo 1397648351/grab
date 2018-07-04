@@ -20,11 +20,14 @@ class Novel:
     SEARCH_NAME = 1
     NORMAL = 0
     REDOWNLOAD = 1
+    Chrome = 0
+    FireFox = 1
 
     def __init__(self, book, mode=SEARCH_ID, type=NORMAL):
         self.version = '1.0'
         self.mutex = threading.Lock()
         self.coexist = 5
+        self.driverName = self.Chrome
         self.driver = None
         self.type = type
         self.domain = 'https://www.xiashu.la'
@@ -59,7 +62,12 @@ class Novel:
             self.get_book(book)
 
     def get_book(self, bookname):
-        self.driver = webdriver.Chrome()
+        if self.driverName == self.Chrome:
+            self.driver = webdriver.Chrome()
+        elif self.driverName == self.FireFox:
+            self.driver = webdriver.Firefox()
+        else:
+            self.driver = webdriver.Chrome()
         try:
             self.driver.get(self.domain)
             input = self.driver.find_element_by_id("shuming")
@@ -89,7 +97,12 @@ class Novel:
         if not url:
             url = self.url_page
         if not self.driver:
-            self.driver = webdriver.Chrome()
+            if self.driverName == self.Chrome:
+                self.driver = webdriver.Chrome()
+            elif self.driverName == self.FireFox:
+                self.driver = webdriver.Firefox()
+            else:
+                self.driver = webdriver.Chrome()
         try:
             self.driver.get(url)
             element = self.driver.find_element_by_id("yc")
