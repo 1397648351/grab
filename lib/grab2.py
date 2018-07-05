@@ -1,66 +1,26 @@
 # -*- coding: utf-8 -*-
 
-import sys, os, urllib2, threading, time, re
-from selenium import webdriver
+import sys
+import zlib
 from pyquery import PyQuery as pq
-
-from selenium.common.exceptions import NoSuchElementException
+from lib.grab import Grab
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-
-class Grab2:
-    driver = None
-
-    def __init__(self, url):
-        """
-        Grab init
-        :param url: URL
-        """
-        self.url = url
-
-
-    @classmethod
-    def open_content(cls, url):
-        try:
-            cls.driver = webdriver.Edge
-            cls.driver.get(url)
-            element = cls.driver.find_element_by_id("yc")
-            element.click()
-            element = cls.driver.find_element_by_id("zkzj")
-            while element.text != '点击关闭':
-                time.sleep(0.1)
-            html = cls.driver.page_source.decode('utf-8', 'ignore')
-            doc = pq(html)
-            list_chapter = doc('#detaillist ul li').items()
-            chapters = []
-            index = 0
-            for chapter in list_chapter:
-                index = index + 1
-                title = chapter('a').text()
-                href = chapter('a').attr('href')
-                chapters.append({
-                    'index': index,
-                    'title': title,
-                    'href': href
-                })
-            print chapters[0]['title']
-        finally:
-            cls.driver.close()
-
-    @classmethod
-    def pull_down(cls, driver, ele):
-        count = 0
-        while not cls.is_exists(driver, ele):
-            js = "window.scrollTo(0,document.body.scrollHeight-" + str(count * count * 200) + ")"
-            driver.execute_script(js)
-            count = count + 1
-
-    @classmethod
-    def is_exists(cls, driver, ele):
-        try:
-            driver.find_element_by_css_selector(ele)
-        except NoSuchElementException:
-            return False
-        return True
+html = Grab.get_content('http://www.qiushu.cc/t/76658/23612976.html')
+# html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '')
+html = zlib.decompress(html, zlib.MAX_WBITS | 16).decode('utf-8')
+doc = pq(html)
+doc('.con_l').remove()
+doc('#stsm').remove()
+# mulu = doc('#content').items()
+content = doc('#content').html().replace('&#13;', '').replace('&nbsp;', '')
+ps = content.split('<br />')
+for p in ps:
+    if not p:
+        continue
+    p = p.strip()
+    if not p:
+        continue
+    print p

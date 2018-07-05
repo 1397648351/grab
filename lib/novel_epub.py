@@ -3,6 +3,7 @@
 import sys
 import os
 import time
+import re
 import threading
 import shutil
 from selenium import webdriver
@@ -137,7 +138,10 @@ class Novel:
         for item in list:
             if not item:
                 continue
-            self.introduction += item.strip() + '<br/>'
+            item = item.strip()
+            if not item:
+                continue
+            self.introduction += item + '<br/>'
         cover = doc('#picbox .img_in img').attr('src')
         Grab.download_image(cover, '%s/%s' % (self.path, self.bookname), 'cover')
         list_chapter = doc('#detaillist ul li').items()
@@ -282,7 +286,10 @@ class Novel:
         for item in list:
             if not item:
                 continue
-            contents = contents + '<p>' + item.strip() + '</p>'
+            item = item.strip()
+            if not item:
+                continue
+            contents += '<p>' + item + '</p>'
         with open('epub/temp_chapter.xhtml', 'r') as f:
             contents = f.read().replace('__CONTENT__', contents).replace('__TITLE__', self.chapters[index]['title'])
         with open('%s/%s/%s' % (self.path, self.bookname, file_name), 'w') as f:

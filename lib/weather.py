@@ -1,9 +1,10 @@
 #!/usr/local/bin/python
-# -*-coding:utf-8-*-
+# -*- coding: utf-8 -*-
 
 import sys
 import requests
 import re
+import time
 import json
 import zlib
 import urllib2
@@ -25,6 +26,7 @@ try:
     forecast = data.get('forecast')
     r_fl = re.compile(r'<!\[CDATA\[(.*)\]\]>')
     r_wd = re.compile(r'.* (.*)')
+    r_date = re.compile(ur'(.{1,2}日).*')
     print u'城  市：%s' % data.get('city')
     print u'天  气：%s' % forecast[0].get('type')
     print u'温  度：%s' % data.get('wendu')
@@ -34,15 +36,19 @@ try:
     print u'最  低：%s' % r_wd.match(forecast[0].get('low')).group(1)
     print u'空  气：%s' % data.get('aqi')
     print u'舒适度：%s' % data.get('ganmao')
-    for i in xrange(1, 5):
+    for i in xrange(0, 5):
         cur = forecast[i]
-        print u'%s：' % cur.get('date')
+        print '\r'
+        str_date = time.strftime(u'%Y年%m月') + r_date.match(cur.get('date')).group(1)
+        date = time.strptime(str_date, u'%Y年%m月%d日')
+        # print int(time.mktime(date))
+        # print time.strftime('%Y年%m月%d日', date)
+        print u'%s：' % time.strftime('%Y年%m月%d日', date)
         print u'\t天气：%s' % cur.get('type')
         print u'\t风向：%s' % cur.get('fengxiang')
         print u'\t风力：%s' % r_fl.match(cur.get('fengli')).group(1)
         print u'\t最高：%s' % r_wd.match(cur.get('high')).group(1)
         print u'\t最低：%s' % r_wd.match(cur.get('low')).group(1)
-        print '\r'
 except Exception, ex:
     print ex.message
 
