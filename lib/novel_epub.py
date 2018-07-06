@@ -137,11 +137,6 @@ class Novel:
             self.driver.get(url)
             if self.settings['page']['do']:
                 self.settings['page']['do'](self.driver)
-            # element = self.driver.find_element_by_id("yc")
-            # element.click()
-            # element = self.driver.find_element_by_id("zkzj")
-            # while element.text != '点击关闭':
-            #     time.sleep(0.1)
             html = self.driver.page_source.decode('utf-8', 'ignore')
             html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
                 'xmlns="http://www.w3.org/1999/xhtml"', '')
@@ -215,9 +210,7 @@ class Novel:
         shutil.copyfile("epub/container.xml", "%s/%s/META-INF/container.xml" % (self.path, self.bookname))
         shutil.copyfile("epub/stylesheet.css", "%s/%s/stylesheet.css" % (self.path, self.bookname))
 
-    def get_chapter_content(self, index, url=None):
-        if url is None:
-            url = self.url_page
+    def get_chapter_content(self, index, url):
         try:
             file_name = '%05d' % (index + 1)
             file_name = 'chapter_' + file_name + '.xhtml'
