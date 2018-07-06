@@ -3,7 +3,6 @@
 import sys
 import os
 import time
-import re
 import threading
 import shutil
 from selenium import webdriver
@@ -35,7 +34,23 @@ class Novel:
         self.url_page = ''
         self.bookid = ''
         self.bookname = ''
-        self.introduction = ""
+        self.introduction = ''
+        self.settings = {
+            'book': {},
+            'page': {
+                'rm_eles': ['#aboutbook a.fr', '#aboutbook h3'],
+                'do': self.ele_click,
+                'name': '#info .infotitle h1',
+                'introduction': '#aboutbook',
+                'creator': '.ainfo .username a',
+                'cover': '#picbox .img_in img',
+                'chapters': '#detaillist ul li'
+            },
+            'chapter': {
+                'rm_eles': [],
+                'content': '#chaptercontent'
+            },
+        }
         self.creator = ""
         self.path = 'file/novel'
         self.info = ''
@@ -76,7 +91,8 @@ class Novel:
             submit = self.driver.find_element_by_id("submitbtn")
             submit.click()
             html = self.driver.page_source.decode('utf-8', 'ignore')
-            html = html.replace('xmlns="http://www.w3.org/1999/xhtml"', '')
+            html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
+                'xmlns="http://www.w3.org/1999/xhtml"', '')
             doc = pq(html)
             link = doc('#waterfall .item.masonry-brick')
             if len(link) > 0:
@@ -94,6 +110,14 @@ class Novel:
             print 'error!', '\n', str(ex)
             return
 
+    @staticmethod
+    def ele_click(driver):
+        element = driver.find_element_by_id("yc")
+        element.click()
+        element = driver.find_element_by_id("zkzj")
+        while element.text != '点击关闭':
+            time.sleep(0.1)
+
     def get_chapters(self, url=None):
         if not url:
             url = self.url_page
@@ -106,13 +130,16 @@ class Novel:
                 self.driver = webdriver.Chrome()
         try:
             self.driver.get(url)
-            element = self.driver.find_element_by_id("yc")
-            element.click()
-            element = self.driver.find_element_by_id("zkzj")
-            while element.text != '点击关闭':
-                time.sleep(0.1)
+            if self.settings['page']['do']:
+                self.settings['page']['do'](self.driver)
+            # element = self.driver.find_element_by_id("yc")
+            # element.click()
+            # element = self.driver.find_element_by_id("zkzj")
+            # while element.text != '点击关闭':
+            #     time.sleep(0.1)
             html = self.driver.page_source.decode('utf-8', 'ignore')
-            html = html.replace('xmlns="http://www.w3.org/1999/xhtml"', '')
+            html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
+                'xmlns="http://www.w3.org/1999/xhtml"', '')
         except Exception, ex:
             print 'error!', '\n', str(ex)
             return
@@ -124,11 +151,12 @@ class Novel:
 
     def get_bookinfo(self, html):
         doc = pq(html)
-        doc('#aboutbook a.fr').remove()
-        doc('#aboutbook h3').remove()
-        introduction = doc('#aboutbook').html()
-        self.bookname = doc('#info .infotitle h1').text().replace(u'《', '').replace(u'》', '').strip()
-        self.creator = doc(".ainfo .username a").text().strip()
+        if self.settings['page']['rm_eles']:
+            for cur in self.settings['page']['rm_eles']:
+                doc(cur).remove()
+        introduction = doc(self.settings['page']['introduction']).html()
+        self.bookname = doc(self.settings['page']['name']).text().replace(u'《', '').replace(u'》', '').strip()
+        self.creator = doc(self.settings['page']['creator']).text().strip()
         if not self.bookname:
             raise Exception('抓取网页失败！')
         self.str_replace.append('恋上你看书网 630bookla ，最快更新%s最新章节！' % self.bookname)
@@ -142,9 +170,9 @@ class Novel:
             if not item:
                 continue
             self.introduction += item + '<br/>'
-        cover = doc('#picbox .img_in img').attr('src')
+        cover = doc(self.settings['page']['cover']).attr('src')
         Grab.download_image(cover, '%s/%s' % (self.path, self.bookname), 'cover')
-        list_chapter = doc('#detaillist ul li').items()
+        list_chapter = doc(self.settings['chapters']['cover']).items()
         index = 0
         for chapter in list_chapter:
             title = chapter('a').text()
@@ -194,9 +222,7 @@ class Novel:
                 print self.chapters[index]["title"] + '  已存在！'
                 self.mutex.release()
                 return
-            # self.mutex.acquire()
             html = Grab.get_content(self.domain + url).decode("utf-8", 'ignore')
-            # self.mutex.release()
         except Exception, e:
             self.mutex.acquire()
             print url + e.message
@@ -204,9 +230,13 @@ class Novel:
             time.sleep(1)
             self.get_chapter_content(index, url)
             return
-        html = html.replace('xmlns="http://www.w3.org/1999/xhtml"', '')
+        html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
+            'xmlns="http://www.w3.org/1999/xhtml"', '')
         doc = pq(html)
-        self.create_chapter(index, doc('#chaptercontent').html())
+        if self.settings['chapter']['rm_eles']:
+            for cur in self.settings['chapter']['rm_eles']:
+                doc(cur).remove()
+        self.create_chapter(index, doc(self.settings['chapter']['content']).html())
 
     def create_thread(self):
         threads = []
