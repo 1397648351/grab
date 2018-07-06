@@ -23,6 +23,14 @@ class Novel:
     Chrome = 0
     FireFox = 1
 
+    @staticmethod
+    def ele_click(driver):
+        element = driver.find_element_by_id("yc")
+        element.click()
+        element = driver.find_element_by_id("zkzj")
+        while element.text != '点击关闭':
+            time.sleep(0.1)
+
     def __init__(self, book, mode=Search_ID, download_mode=Normal):
         self.version = '1.0'
         self.mutex = threading.Lock()
@@ -30,12 +38,12 @@ class Novel:
         self.driverName = self.Chrome
         self.driver = None
         self.type = download_mode
-        self.domain = 'https://www.xiashu.la'
         self.url_page = ''
         self.bookid = ''
         self.bookname = ''
         self.introduction = ''
         self.settings = {
+            'home': 'https://www.xiashu.la',
             'book': {
                 'input': 'shuming',
                 'submit': 'submitbtn',
@@ -77,7 +85,7 @@ class Novel:
         ]
         if mode == self.Search_ID:
             self.bookid = book
-            self.url_page = '%s/%s/' % (self.domain, self.bookid)
+            self.url_page = '%s/%s/' % (self.settings['home'], self.bookid)
             self.get_chapters()
         else:
             self.get_book(book)
@@ -90,7 +98,7 @@ class Novel:
         else:
             self.driver = webdriver.Chrome()
         try:
-            self.driver.get(self.domain)
+            self.driver.get(self.settings['home'])
             input = self.driver.find_element_by_id(self.settings['book']['input'])
             input.send_keys(bookname)
             submit = self.driver.find_element_by_id(self.settings['book']['submit'])
@@ -108,20 +116,12 @@ class Novel:
                     print u'未找到该书籍《%s》' % bookname
                     return
                 self.bookid = link.attr('href').replace(self.settings['book']['link_replace'], '')
-                self.url_page = '%s/%s/' % (self.domain, self.bookid)
+                self.url_page = '%s/%s/' % (self.settings['home'], self.bookid)
                 self.get_chapters()
         except Exception, ex:
             self.driver.quit()
             print 'error!', '\n', str(ex)
             return
-
-    @staticmethod
-    def ele_click(driver):
-        element = driver.find_element_by_id("yc")
-        element.click()
-        element = driver.find_element_by_id("zkzj")
-        while element.text != '点击关闭':
-            time.sleep(0.1)
 
     def get_chapters(self, url=None):
         if not url:
@@ -227,7 +227,7 @@ class Novel:
                 print '%s %s 已存在！' % (self.bookname, self.chapters[index]["title"])
                 self.mutex.release()
                 return
-            html = Grab.get_content(self.domain + url).decode("utf-8", 'ignore')
+            html = Grab.get_content(self.settings['home'] + url).decode("utf-8", 'ignore')
         except Exception, e:
             self.mutex.acquire()
             print url + e.message
