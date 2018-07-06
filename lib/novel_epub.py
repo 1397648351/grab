@@ -36,7 +36,12 @@ class Novel:
         self.bookname = ''
         self.introduction = ''
         self.settings = {
-            'book': {},
+            'book': {
+                'input': 'shuming',
+                'submit': 'submitbtn',
+                'link': '#waterfall .item.masonry-brick',
+                'link_replace': '/api/ajax/searchid.php?id='
+            },
             'page': {
                 'rm_eles': ['#aboutbook a.fr', '#aboutbook h3'],
                 'do': self.ele_click,
@@ -72,7 +77,7 @@ class Novel:
         ]
         if mode == self.Search_ID:
             self.bookid = book
-            self.url_page = 'https://www.xiashu.la/%s/' % self.bookid
+            self.url_page = '%s/%s/' % (self.domain, self.bookid)
             self.get_chapters()
         else:
             self.get_book(book)
@@ -86,15 +91,15 @@ class Novel:
             self.driver = webdriver.Chrome()
         try:
             self.driver.get(self.domain)
-            input = self.driver.find_element_by_id("shuming")
+            input = self.driver.find_element_by_id(self.settings['book']['input'])
             input.send_keys(bookname)
-            submit = self.driver.find_element_by_id("submitbtn")
+            submit = self.driver.find_element_by_id(self.settings['book']['submit'])
             submit.click()
             html = self.driver.page_source.decode('utf-8', 'ignore')
             html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
                 'xmlns="http://www.w3.org/1999/xhtml"', '')
             doc = pq(html)
-            link = doc('#waterfall .item.masonry-brick')
+            link = doc(self.settings['book']['link'])
             if len(link) > 0:
                 link = link.eq(0).find('.title h3 a')
                 self.bookname = link.text().strip()
@@ -102,8 +107,8 @@ class Novel:
                     self.driver.quit()
                     print u'未找到该书籍《%s》' % bookname
                     return
-                self.bookid = link.attr('href').replace("/api/ajax/searchid.php?id=", '')
-                self.url_page = 'https://www.xiashu.la/%s/' % self.bookid
+                self.bookid = link.attr('href').replace(self.settings['book']['link_replace'], '')
+                self.url_page = '%s/%s/' % (self.domain, self.bookid)
                 self.get_chapters()
         except Exception, ex:
             self.driver.quit()
@@ -172,7 +177,7 @@ class Novel:
             self.introduction += item + '<br/>'
         cover = doc(self.settings['page']['cover']).attr('src')
         Grab.download_image(cover, '%s/%s' % (self.path, self.bookname), 'cover')
-        list_chapter = doc(self.settings['chapters']['cover']).items()
+        list_chapter = doc(self.settings['page']['chapters']).items()
         index = 0
         for chapter in list_chapter:
             title = chapter('a').text()
@@ -219,7 +224,7 @@ class Novel:
             folder = os.path.exists('%s/%s/%s' % (self.path, self.bookname, file_name))
             if folder:
                 self.mutex.acquire()
-                print self.chapters[index]["title"] + '  已存在！'
+                print '%s %s 已存在！' % (self.bookname, self.chapters[index]["title"])
                 self.mutex.release()
                 return
             html = Grab.get_content(self.domain + url).decode("utf-8", 'ignore')
