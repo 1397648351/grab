@@ -178,7 +178,7 @@ class Novel:
             title = chapter('a').text()
             href = chapter('a').attr('href')
             if not title or not href:
-                continue
+                break  # continue
             index = index + 1
             self.chapters.append({
                 'index': index,
