@@ -26,14 +26,6 @@ class Novel:
     FireFox = 1
     Edge = 2
 
-    @staticmethod
-    def ele_click(driver):
-        element = driver.find_element_by_id("yc")
-        element.click()
-        element = driver.find_element_by_id("zkzj")
-        while element.text != '点击关闭':
-            time.sleep(0.1)
-
     def __init__(self, book, mode=Search_ID, download_mode=Normal):
         self.version = '1.0'
         self.mutex = threading.Lock()
