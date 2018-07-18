@@ -10,6 +10,7 @@ from pyquery import PyQuery as pq
 import zipfile
 import zlib
 
+import lib.novel_config as config
 from lib.grab import Grab
 
 reload(sys)
@@ -24,8 +25,6 @@ class Novel:
     Chrome = 0
     FireFox = 1
     Edge = 2
-    xiashu = 0
-    biquge = 1
 
     @staticmethod
     def ele_click(driver):
@@ -46,81 +45,14 @@ class Novel:
         self.bookid = ''
         self.bookname = ''
         self.introduction = ''
-        self.configs = [{
-            'home': 'https://www.xiashu.la',
-            'decode': 'utf-8',
-            'book': {
-                'input': 'shuming',
-                'submit': 'submitbtn',
-                'link': '#waterfall .item.masonry-brick',
-                'href': '.title h3 a',
-                'link_replace': '/api/ajax/searchid.php?id='
-            },
-            'page': {
-                'rm_eles': ['#aboutbook a.fr', '#aboutbook h3'],
-                'do': self.ele_click,
-                'name': '#info .infotitle h1',
-                'introduction': '#aboutbook',
-                'creator': '.ainfo .username a',
-                'cover': '#picbox .img_in img',
-                'chapters': '#detaillist ul li',
-                'link_concat': True
-            },
-            'chapter': {
-                'rm_eles': [],
-                'content': '#chaptercontent',
-                'gzip': False
-            },
-        }, {
-            'home': 'https://www.biquge5200.cc',
-            'decode': 'gbk',
-            'book': {
-                'input': 'wd',
-                'submit': 'sss',
-                'link': '#hotcontent table.grid tr:gt(0)',
-                'href': 'td.odd:lt(1) a',
-                'link_replace': 'https://www.biquge5200.cc/'
-            },
-            'page': {
-                'rm_eles': [],
-                'do': None,
-                'name': '#info h1',
-                'introduction': '#intro',
-                'creator': '#info p:lt(1)',
-                'cover': '#fmimg img',
-                'chapters': '#list dd:gt(8)',
-                'link_concat': False
-            },
-            'chapter': {
-                'rm_eles': [],
-                'content': '#content',
-                'gzip': False
-            },
-        }]
-        self.settings = self.configs[self.xiashu]
+        self.settings = config.settings[config.xiashu]
+        self.str_replace = config.str_replace
         self.template = 'template/epub/'
         self.creator = ""
         self.path = 'file/novel'
         self.info = ''
         self.book = {}
         self.chapters = []
-        self.str_replace = [
-            '一秒记住【棉花糖小说网mianhuatang.la】，为您提供精彩小说阅读。',
-            '一秒记住【谷♂粒÷小÷说→网 xinguli】，更新快，无弹窗，免费读！',
-            '一秒记住【谷♂粒÷网 xinguli】，精彩小说无弹窗免费阅读！',
-            'c_t;', 'reads;', '（ 广告）', '( $&gt;&gt;&gt;棉、花‘糖’小‘說’)',
-            '( $>>>棉、花‘糖’小‘說’)', '( )', '（ ）', '[ ]', '（ 棉花糖', '( ’)',
-            '[看本书最新章节请到]', '[更新快，网站页面清爽，广告少，，最喜欢这种网站了，一定要好评]',
-            '其c他都5是w盗版0`', '天才壹秒記住愛♂去÷小說→網，為您提供精彩小說閱讀。',
-            '~搜搜篮色，即可全文阅读后面章节', '-79-', '-79xs-', '&amp;nnsp;',
-            '最新章节全文阅读。更多最新章节访问:ww 。', '。 更新好快。',
-            '最新章节全文阅读', '。更多最新章节访问:ww 。', 'ＷｗΔＷ．『ksnhuge『ge．La',
-            '[想看的书几乎都有啊，比一般的站要稳定很多更新还快，全文字的没有广告。]',
-            '恋上你看书网 630bookla ，最快更新神豪无极限最新章节！', 'readx;',
-            '<br/>　　逐浪推荐游戏<br/><br/>　　三国演义<br/><br/>　　傲视天地<br/><br/>　　屠龙            ',
-            'm.22ff.co m', 'm.woquge.co m', 'i.woquge.co m', 'WoQuGe.co m', 'woquge.co m', 'WoQuGe',
-            'woquge', 'biquge5200'
-        ]
         if mode == self.Search_ID:
             self.bookid = book
             self.url_page = '%s/%s/' % (self.settings['home'], self.bookid)
@@ -202,7 +134,6 @@ class Novel:
         self.creator = doc(self.settings['page']['creator']).text().strip()
         if not self.bookname:
             raise Exception('抓取网页失败！')
-        self.str_replace.append('恋上你看书网 630bookla ，最快更新%s最新章节！' % self.bookname)
         print "《%s》开始抓取" % self.bookname
         self.create_path()
         list = introduction.split('<br/>')
@@ -358,6 +289,7 @@ class Novel:
         content = content.replace(self.chapters[index]['title'], '').replace(
             self.chapters[index]['title'].replace(' ', ''), '')
         for item in self.str_replace:
+            item = item.replace('__BOOKNAME__', self.bookname)
             content = content.replace(item, '')
         list = content.split('<br/>')
         contents = ''
