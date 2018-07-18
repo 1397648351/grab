@@ -88,6 +88,7 @@ class Grab:
         try:
             pattern = re.compile(r'.*(\.bmp|\.jpg|\.jpeg|\.png|\.gif).*', re.I)
             m = pattern.match(url)
+            file_ext = '.jpg'
             if m:
                 file_ext = m.group(1)
             folder = os.path.exists(path)

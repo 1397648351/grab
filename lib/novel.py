@@ -8,6 +8,7 @@ import shutil
 from selenium import webdriver
 from pyquery import PyQuery as pq
 import zipfile
+import zlib
 
 from lib.grab import Grab
 
@@ -22,6 +23,7 @@ class Novel:
     ReDownload = 1
     Chrome = 0
     FireFox = 1
+    Edge = 2
 
     @staticmethod
     def ele_click(driver):
@@ -42,12 +44,14 @@ class Novel:
         self.bookid = ''
         self.bookname = ''
         self.introduction = ''
-        self.settings = {
+        self.configs = [{
             'home': 'https://www.xiashu.la',
+            'decode': 'utf-8',
             'book': {
                 'input': 'shuming',
                 'submit': 'submitbtn',
                 'link': '#waterfall .item.masonry-brick',
+                'href': '.title h3 a',
                 'link_replace': '/api/ajax/searchid.php?id='
             },
             'page': {
@@ -57,13 +61,41 @@ class Novel:
                 'introduction': '#aboutbook',
                 'creator': '.ainfo .username a',
                 'cover': '#picbox .img_in img',
-                'chapters': '#detaillist ul li'
+                'chapters': '#detaillist ul li',
+                'link_concat': True
             },
             'chapter': {
                 'rm_eles': [],
-                'content': '#chaptercontent'
+                'content': '#chaptercontent',
+                'gzip': False
             },
-        }
+        }, {
+            'home': 'https://www.biquge5200.cc',
+            'decode': 'gbk',
+            'book': {
+                'input': 'wd',
+                'submit': 'sss',
+                'link': '#hotcontent table.grid tr:gt(0)',
+                'href': 'td.odd:lt(1) a',
+                'link_replace': 'https://www.biquge5200.cc/'
+            },
+            'page': {
+                'rm_eles': [],
+                'do': None,
+                'name': '#info h1',
+                'introduction': '#intro',
+                'creator': '#info p:lt(1)',
+                'cover': '#fmimg img',
+                'chapters': '#list dd:gt(8)',
+                'link_concat': False
+            },
+            'chapter': {
+                'rm_eles': [],
+                'content': '#content',
+                'gzip': False
+            },
+        }]
+        self.settings = self.configs[1]
         self.template = 'template/epub/'
         self.creator = ""
         self.path = 'file/novel'
@@ -101,6 +133,8 @@ class Novel:
             self.driver = webdriver.Chrome()
         elif self.driverName == self.FireFox:
             self.driver = webdriver.Firefox()
+        elif self.driverName == self.Edge:
+            self.driver = webdriver.Edge()
         else:
             self.driver = webdriver.Chrome()
         try:
@@ -115,7 +149,7 @@ class Novel:
             doc = pq(html)
             link = doc(self.settings['book']['link'])
             if len(link) > 0:
-                link = link.eq(0).find('.title h3 a')
+                link = link.eq(0).find(self.settings['book']['href'])
                 self.bookname = link.text().strip()
                 if bookname != self.bookname:
                     self.driver.quit()
@@ -143,6 +177,7 @@ class Novel:
             self.driver.get(url)
             if self.settings['page']['do']:
                 self.settings['page']['do'](self.driver)
+            html = self.driver.page_source
             html = self.driver.page_source.decode('utf-8', 'ignore')
             html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
                 'xmlns="http://www.w3.org/1999/xhtml"', '')
@@ -228,7 +263,12 @@ class Novel:
                 print '%s %s 已存在！' % (self.bookname, self.chapters[index]["title"])
                 self.mutex.release()
                 return
-            html = Grab.get_content(self.settings['home'] + url).decode("utf-8", 'ignore')
+            if self.settings['page']['link_concat']:
+                url = self.settings['home'] + url
+            html = Grab.get_content(url)
+            if self.settings['chapter']['gzip']:
+                html = zlib.decompress(html, zlib.MAX_WBITS | 16)
+            html = html.decode(self.settings['decode'], 'ignore')
         except Exception, e:
             self.mutex.acquire()
             print url + e.message
