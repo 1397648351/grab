@@ -24,6 +24,8 @@ class Novel:
     Chrome = 0
     FireFox = 1
     Edge = 2
+    xiashu = 0
+    biquge = 1
 
     @staticmethod
     def ele_click(driver):
@@ -95,7 +97,7 @@ class Novel:
                 'gzip': False
             },
         }]
-        self.settings = self.configs[1]
+        self.settings = self.configs[self.xiashu]
         self.template = 'template/epub/'
         self.creator = ""
         self.path = 'file/novel'
