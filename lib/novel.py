@@ -83,7 +83,8 @@ class Novel:
             '最新章节全文阅读', '。更多最新章节访问:ww 。', 'ＷｗΔＷ．『ksnhuge『ge．La',
             '[想看的书几乎都有啊，比一般的站要稳定很多更新还快，全文字的没有广告。]',
             '恋上你看书网 630bookla ，最快更新神豪无极限最新章节！', 'readx;',
-            '<br/>　　逐浪推荐游戏<br/><br/>　　三国演义<br/><br/>　　傲视天地<br/><br/>　　屠龙            '
+            '<br/>　　逐浪推荐游戏<br/><br/>　　三国演义<br/><br/>　　傲视天地<br/><br/>　　屠龙            ',
+            'm.22ff.co m'
         ]
         if mode == self.Search_ID:
             self.bookid = book
