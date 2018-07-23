@@ -31,7 +31,7 @@ class Novel:
         self.version = '1.0'
         self.mutex = threading.Lock()
         self.coexist = 5
-        self.driverName = self.Ie
+        self.driverName = self.Chrome
         self.driver = None
         self.type = download_mode
         self.url_page = ''
