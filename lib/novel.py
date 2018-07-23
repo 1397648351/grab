@@ -38,7 +38,7 @@ class Novel:
         self.bookid = ''
         self.bookname = ''
         self.introduction = ''
-        self.settings = config.settings[config.biquge]
+        self.settings = config.settings[config.xiashu]
         self.str_replace = config.str_replace
         self.template = 'template/epub/'
         self.creator = ""
@@ -46,7 +46,7 @@ class Novel:
         self.info = ''
         self.book = {}
         self.chapters = []
-        self.threads = []
+        # self.threads = []
         self.state = False
         if mode == self.Search_ID:
             self.bookid = book
@@ -184,6 +184,7 @@ class Novel:
                         "%s/%s/stylesheet.css" % (self.path, self.bookname))
 
     def get_chapter_content(self, index, url):
+        _url = url
         try:
             file_name = '%05d' % (index + 1)
             file_name = 'chapter_' + file_name + '.xhtml'
@@ -194,14 +195,14 @@ class Novel:
                 self.mutex.release()
                 return
             if self.settings['page']['link_concat']:
-                url = self.settings['home'] + url
-            html = Grab.get_content(url)
+                _url = self.settings['home'] + url
+            html = Grab.get_content(_url)
             if self.settings['chapter']['gzip']:
                 html = zlib.decompress(html, zlib.MAX_WBITS | 16)
             html = html.decode(self.settings['decode'], 'ignore')
         except Exception, e:
             self.mutex.acquire()
-            print url + e.message
+            print _url, e.message
             self.mutex.release()
             time.sleep(1)
             self.get_chapter_content(index, url)
@@ -215,25 +216,16 @@ class Novel:
         self.create_chapter(index, doc(self.settings['chapter']['content']).html())
 
     def create_thread(self):
-        self.threads = []
-        self.state = True
-        th_handle = threading.Thread(target=self.thread_handle)
-        th_handle.start()
+        threads = []
         for chapter in self.chapters:
             th = threading.Thread(target=self.get_chapter_content, args=(chapter['index'] - 1, chapter['href'],))
             th.start()
-            self.threads.append(th)
-            while len(self.threads) >= self.coexist:
-                time.sleep(.03)
-        self.state = False
-        th_handle.join()
-        while len(self.threads) > 0:
-            self.threads.pop(0).join()
-
-    def thread_handle(self):
-        while self.state:
-            while len(self.threads) > 0:
-                self.threads.pop(0).join()
+            threads.append(th)
+            if len(threads) >= self.coexist:
+                while len(threads) > 0:
+                    threads.pop(0).join()
+        while len(threads) > 0:
+            threads.pop(0).join()
 
     def save_files(self):
         self.create_page()

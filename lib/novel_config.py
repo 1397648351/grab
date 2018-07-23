@@ -84,5 +84,5 @@ str_replace = [
     '<br/>　　逐浪推荐游戏<br/><br/>　　三国演义<br/><br/>　　傲视天地<br/><br/>　　屠龙            ',
     'm.22ff.co m', 'm.woquge.co m', 'i.woquge.co m', 'WoQuGe.co m', 'woquge.co m', 'WoQuGe',
     'woquge', 'biquge5200', '恋上你看书网 630bookla ，最快更新__BOOKNAME__最新章节！',
-    '〖∷更新快∷无弹窗∷纯文字∷〗'
+    '〖∷更新快∷无弹窗∷纯文字∷〗','(请搜索八一，更新最快的站!)','(请搜索八一，或者直接输入看最新章节)'
 ]

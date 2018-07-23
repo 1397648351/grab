@@ -58,7 +58,7 @@ class Grab:
             if hasattr(e, 'code'):
                 code = e.code
             elif hasattr(e, 'reason'):
-                print str(e.reason)
+                print url, str(e.reason)
                 pattern = re.compile(r'\[.* (\d+)\]', re.M)
                 m = pattern.match(str(e.reason))
                 if m:
@@ -67,7 +67,7 @@ class Grab:
                 restart = False
                 print 'Error Code: %s, URL: %s' % (code, url)
             else:
-                print e.reason
+                print url, e.reason
             if restart:
                 time.sleep(1)
                 return cls.get_content(url)
