@@ -25,12 +25,13 @@ class Novel:
     Chrome = 0
     FireFox = 1
     Edge = 2
+    Ie = 3
 
     def __init__(self, book, mode=Search_ID, download_mode=Normal):
         self.version = '1.0'
         self.mutex = threading.Lock()
         self.coexist = 5
-        self.driverName = self.Chrome
+        self.driverName = self.Ie
         self.driver = None
         self.type = download_mode
         self.url_page = ''
@@ -61,6 +62,8 @@ class Novel:
             self.driver = webdriver.Firefox()
         elif self.driverName == self.Edge:
             self.driver = webdriver.Edge()
+        elif self.driverName == self.Ie:
+            self.driver = webdriver.Ie()
         else:
             self.driver = webdriver.Chrome()
         try:
