@@ -38,7 +38,7 @@ class Novel:
         self.bookid = ''
         self.bookname = ''
         self.introduction = ''
-        self.settings = config.settings[config.xiashu]
+        self.settings = config.settings[config.biquge]
         self.str_replace = config.str_replace
         self.template = 'template/epub/'
         self.creator = ""
@@ -46,6 +46,8 @@ class Novel:
         self.info = ''
         self.book = {}
         self.chapters = []
+        self.threads = []
+        self.state = False
         if mode == self.Search_ID:
             self.bookid = book
             self.url_page = '%s/%s/' % (self.settings['home'], self.bookid)
@@ -213,18 +215,25 @@ class Novel:
         self.create_chapter(index, doc(self.settings['chapter']['content']).html())
 
     def create_thread(self):
-        threads = []
+        self.threads = []
+        self.state = True
+        th_handle = threading.Thread(target=self.thread_handle)
+        th_handle.start()
         for chapter in self.chapters:
             th = threading.Thread(target=self.get_chapter_content, args=(chapter['index'] - 1, chapter['href'],))
             th.start()
-            threads.append(th)
-            if len(threads) >= self.coexist:
-                for _th in threads:
-                    _th.join()
-                del threads[:]
-        for _th in threads:
-            _th.join()
-        del threads[:]
+            self.threads.append(th)
+            while len(self.threads) >= self.coexist:
+                time.sleep(.03)
+        self.state = False
+        th_handle.join()
+        while len(self.threads) > 0:
+            self.threads.pop(0).join()
+
+    def thread_handle(self):
+        while self.state:
+            while len(self.threads) > 0:
+                self.threads.pop(0).join()
 
     def save_files(self):
         self.create_page()
