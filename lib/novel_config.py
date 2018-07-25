@@ -12,6 +12,7 @@ def ele_click(driver):
 
 xiashu = 0
 biquge = 1
+url = xiashu
 
 settings = [
     {

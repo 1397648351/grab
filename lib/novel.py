@@ -38,7 +38,7 @@ class Novel:
         self.bookid = ''
         self.bookname = ''
         self.introduction = ''
-        self.settings = config.settings[config.xiashu]
+        self.settings = config.settings[config.url]
         self.str_replace = config.str_replace
         self.template = 'template/epub/'
         self.creator = ""
