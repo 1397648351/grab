@@ -58,16 +58,22 @@ class Grab:
             if hasattr(e, 'code'):
                 code = e.code
             elif hasattr(e, 'reason'):
+                cls.mutex.acquire()
                 print url, str(e.reason)
+                cls.mutex.release()
                 pattern = re.compile(r'\[.* (\d+)\]', re.M)
                 m = pattern.match(str(e.reason))
                 if m:
                     code = m.group(1)
             if 'code' in vars() and str(code) in codes:
+                cls.mutex.acquire()
                 restart = False
+                cls.mutex.release()
                 print 'Error Code: %s, URL: %s' % (code, url)
             else:
+                cls.mutex.acquire()
                 print url, e.reason
+                cls.mutex.release()
             if restart:
                 time.sleep(1)
                 return cls.get_content(url)
