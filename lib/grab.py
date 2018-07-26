@@ -68,8 +68,8 @@ class Grab:
             if 'code' in vars() and str(code) in codes:
                 cls.mutex.acquire()
                 restart = False
-                cls.mutex.release()
                 print 'Error Code: %s, URL: %s' % (code, url)
+                cls.mutex.release()
             else:
                 cls.mutex.acquire()
                 print url, e.reason

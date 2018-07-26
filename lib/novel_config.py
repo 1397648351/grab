@@ -12,7 +12,8 @@ def ele_click(driver):
 
 xiashu = 0
 biquge = 1
-url = xiashu
+aishu = 2
+url = biquge
 
 settings = [
     {
@@ -64,6 +65,32 @@ settings = [
         'chapter': {
             'rm_eles': [],
             'content': '#content',
+            'gzip': False
+        },
+    },
+    {
+        'home': 'http://www.22ff.com',
+        'decode': 'gbk',
+        'book': {
+            'input': 'sk',
+            'submit': 'searcher',
+            'link': '.neirong ul:gt(0)',
+            'href': 'li.neirong1 a:lt(1)',
+            'link_replace': ''
+        },
+        'page': {
+            'rm_eles': ['h4'],
+            'do': None,
+            'name': '.tname a',
+            'introduction': 'table.fw tr:nth-child(3)',
+            'creator': 'table.fw tr:nth-child(0) td:nth-child(2) a',
+            'cover': 'img.novel_cover',
+            'chapters': '.neirong .clc',
+            'link_concat': True
+        },
+        'chapter': {
+            'rm_eles': ['#chapter_content script'],
+            'content': '#chapter_content',
             'gzip': False
         },
     }
