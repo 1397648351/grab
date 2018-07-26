@@ -27,7 +27,7 @@ class Novel:
     Edge = 2
     Ie = 3
 
-    def __init__(self, book, mode=Search_ID, download_mode=Normal):
+    def __init__(self, book, mode=Search_ID, download_mode=Normal, website=config.xiashu):
         self.version = '1.0'
         self.mutex = threading.Lock()
         self.coexist = 5
@@ -38,7 +38,7 @@ class Novel:
         self.bookid = ''
         self.bookname = ''
         self.introduction = ''
-        self.settings = config.settings[config.url]
+        self.settings = config.settings[website]
         self.str_replace = config.str_replace
         self.template = 'template/epub/'
         self.creator = ""

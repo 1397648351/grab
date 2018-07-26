@@ -12,9 +12,10 @@ engine.setProperty('volume', 1.0)  # 音量
 engine.setProperty('rate', 200)  # 语速
 
 if __name__ == "__main__":
-    novels = ['奶爸的文艺人生']
+    novels = ['至尊兵王']
     mode = Novel.Search_Name
     down_mode = Novel.Normal
+    website = 1 # xiashu = 0, biquge = 1, aishu = 2
 
     if not novels:
         name = raw_input(u'书名：')
@@ -26,6 +27,6 @@ if __name__ == "__main__":
             novel = unicode(novel, 'utf-8')
         engine.say(u'开始抓取 %s' % novel)
         engine.runAndWait()
-        Novel(novel, mode, down_mode)
+        Novel(novel, mode, down_mode, website)
     engine.say(u'抓取完成')
     engine.runAndWait()
