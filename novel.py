@@ -15,7 +15,7 @@ if __name__ == "__main__":
     novels = ['至尊兵王']
     mode = Novel.Search_Name
     down_mode = Novel.Normal
-    website = 1 # xiashu = 0, biquge = 1, aishu = 2
+    website = 0  # xiashu = 0, biquge = 1, aishu = 2
 
     if not novels:
         name = raw_input(u'书名：')
