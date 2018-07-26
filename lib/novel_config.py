@@ -48,7 +48,7 @@ settings = [
             'input': 'wd',
             'submit': 'sss',
             'link': '#hotcontent table.grid tr:gt(0)',
-            'href': 'td.odd:lt(1) a',
+            'href': 'td.odd:nth-child(1) a',
             'link_replace': 'https://www.biquge5200.cc/'
         },
         'page': {
@@ -56,7 +56,7 @@ settings = [
             'do': None,
             'name': '#info h1',
             'introduction': '#intro',
-            'creator': '#info p:lt(1)',
+            'creator': '#info>p:nth-child(2)',
             'cover': '#fmimg img',
             'chapters': '#list dd:gt(8)',
             'link_concat': False
@@ -81,8 +81,8 @@ settings = [
             'rm_eles': ['h4'],
             'do': None,
             'name': '.tname a',
-            'introduction': 'table.fw tr:nth-child(3)',
-            'creator': 'table.fw tr:nth-child(0) td:nth-child(2) a',
+            'introduction': 'table.fw tr:nth-child(4)',
+            'creator': 'table.fw tr:nth-child(1) td:nth-child(3) a',
             'cover': 'img.novel_cover',
             'chapters': '.neirong .clc',
             'link_concat': True
