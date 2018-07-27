@@ -13,6 +13,7 @@ def ele_click(driver):
 xiashu = 0
 biquge = 1
 aishu = 2
+mianhuatang = 3
 
 settings = [
     {
@@ -90,6 +91,32 @@ settings = [
         'chapter': {
             'rm_eles': ['#chapter_content script'],
             'content': '#chapter_content',
+            'gzip': False
+        },
+    },
+    {
+        'home': 'http://www.mianhuatang520.com/',
+        'decode': 'gbk',
+        'book': {
+            'input': 'bookname',
+            'submit': 'sss',
+            'link': '#newscontent>.l>ul>li',
+            'href': '.s2>a',
+            'link_replace': 'http://www.mianhuatang520.com/'
+        },
+        'page': {
+            'rm_eles': [],
+            'do': None,
+            'name': '#info h1',
+            'introduction': '#intro',
+            'creator': '#info div:nth-child(2)',
+            'cover': '#fmimg>img',
+            'chapters': '#list>dl>dd',
+            'link_concat': False
+        },
+        'chapter': {
+            'rm_eles': ['#zjneirong>div'],
+            'content': '#zjneirong',
             'gzip': False
         },
     }

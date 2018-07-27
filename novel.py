@@ -12,10 +12,10 @@ engine.setProperty('volume', 1.0)  # 音量
 engine.setProperty('rate', 200)  # 语速
 
 if __name__ == "__main__":
-    novels = ['至尊兵王']
+    novels = ['宇宙的边缘世界']
     mode = Novel.Search_Name
     down_mode = Novel.Normal
-    website = 0  # xiashu = 0, biquge = 1, aishu = 2
+    website = 1  # xiashu = 0, biquge = 1, aishu = 2, mianhuatang = 3
 
     if not novels:
         name = raw_input(u'书名：')
