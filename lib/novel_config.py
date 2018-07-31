@@ -140,7 +140,7 @@ str_replace = [
     'woquge', 'biquge5200', '恋上你看书网 630bookla ，最快更新__BOOKNAME__最新章节！',
     '〖∷更新快∷无弹窗∷纯文字∷〗', '(请搜索八一，更新最快的站!)', '(请搜索八一，或者直接输入看最新章节)',
     '高速首发__BOOKNAME__最新章节，本章节是地址为如果你觉的本章节还不错的话请不要忘记向您qq群和微博里的朋友推荐哦！',
-    '【品文移动阅读-m.pinwenba】', '(  全文阅读)', 'rgstt',
+    '【品文移动阅读-m.pinwenba】', '(  全文阅读)', 'rgstt', 'cqhtg',
     '.co', 'tyjiao', 'tangkx', 'js518pinwenba', 'jlgxhqpinwenba', 'jiaoyu123', 'yacht4s',
     'hotensharepinwenba', 'hotenshare', 'pinwenba', 'weibogg', '【品-文-吧】',
 ]
