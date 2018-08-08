@@ -81,7 +81,7 @@ class Grab:
                 return None
 
     @classmethod
-    def download_image(cls, url, path, name):
+    def download_image(cls, url, path, name, noprint=False):
         """
         下载图片
         :param url: URL
@@ -90,30 +90,33 @@ class Grab:
         """
         if not url:
             raise GrabError(u"URL不能为空")
-        cls.mutex.acquire()
         try:
             pattern = re.compile(r'.*(\.bmp|\.jpg|\.jpeg|\.png|\.gif).*', re.I)
             m = pattern.match(url)
             file_ext = '.jpg'
             if m:
                 file_ext = m.group(1)
+            cls.mutex.acquire()
             folder = os.path.exists(path)
             if not folder or (folder and not os.path.isdir(path)):
                 os.makedirs(path)
             filename = "%s/%s%s" % (path, name, (file_ext) if file_ext else '')
-            if os.path.isfile(filename) and os.path.exists(filename):
-                print "%s 已存在" % filename
+            confirm = os.path.isfile(filename) and os.path.exists(filename)
+            cls.mutex.release()
+            if confirm:
+                if not noprint:
+                    print "%s 已存在" % filename
                 return False
             content = cls.get_content(url)
             if content:
                 with open(filename, 'wb') as f:
                     f.write(content)
+            if not noprint:
+                print '%s 下载完成！' % filename
             return True
         except Exception, e:
             print '%s %s/%s error:%s' % (url, path, name, str(e))
             return False
-        finally:
-            cls.mutex.release()
 
 
 class GrabError(Exception):

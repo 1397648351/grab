@@ -16,6 +16,7 @@ class DB:
     def __init__(self):
         self.version = '1.0'
 
+    @staticmethod
     def doTrans(self, sqlList):
         """
         执行事务
@@ -38,6 +39,7 @@ class DB:
             connection.close()
         return i
 
+    @staticmethod
     def execute(self, sql):
         """
         执行一条sql
@@ -56,6 +58,7 @@ class DB:
             connection.close()
         return num
 
+    @staticmethod
     def fetchall(self, sql):
         """
         根据sql返回集合
@@ -74,6 +77,7 @@ class DB:
         finally:
             connection.close()
 
+    @staticmethod
     def fetchone(self, sql):
         """
         根据sql返回第一个
