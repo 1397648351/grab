@@ -222,8 +222,8 @@ class Novel:
             th.start()
             threads.append(th)
             if len(threads) >= self.coexist:
-                while len(threads) > 0:
-                    threads.pop(0).join()
+                # while len(threads) > 0:
+                threads.pop(0).join()
         while len(threads) > 0:
             threads.pop(0).join()
 
