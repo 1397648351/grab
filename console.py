@@ -17,4 +17,5 @@ if __name__ == "__main__":
     ]
     for str in strs:
         print '\r%s' % str,
+        sys.stdout.flush()
         time.sleep(1)
