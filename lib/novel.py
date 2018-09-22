@@ -47,6 +47,7 @@ class Novel:
         self.info = ''
         self.book = {}
         self.chapters = []
+        self.strlen = 0
         # self.threads = []
         self.state = False
         if mode == self.Search_ID:
@@ -55,6 +56,13 @@ class Novel:
             self.get_chapters()
         else:
             self.get_book(book)
+
+    def clearline(self):
+        str = ''
+        if self.strlen >0 :
+            for i in xrange(self.strlen):
+                str += ' '
+            print '\r%s' % str,
 
     def get_book(self, bookname):
         if not isinstance(bookname, unicode):
@@ -194,7 +202,10 @@ class Novel:
                 self.mutex.acquire()
                 self.num += 1
                 percent = self.num * 100.0 / len(self.chapters)
-                print '\r%s %.2f%% %s 已存在！' % (self.bookname, percent, self.chapters[index]["title"]),
+                # print '\r%s [%.2f%%] %s 已存在！ ' % (self.bookname, percent, self.chapters[index]["title"]),
+                str = '%s [%.2f%%] %s 已存在！ ' % (self.bookname, percent, self.chapters[index]["title"])
+                print '\r%s' % str,
+                sys.stdout.flush()
                 self.mutex.release()
                 return
             if self.settings['page']['link_concat']:
@@ -205,7 +216,9 @@ class Novel:
             html = html.decode(self.settings['decode'], 'ignore')
         except Exception, e:
             self.mutex.acquire()
-            print '\r%s %s' % (_url, e.message),
+            # print '\r%s %s ' % (_url, e.message),
+            print '\n%s %s' % (_url, e.message)
+            sys.stdout.flush()
             self.mutex.release()
             time.sleep(1)
             self.get_chapter_content(index, url)
@@ -306,8 +319,9 @@ class Novel:
         self.mutex.acquire()
         self.num += 1
         percent = self.num * 100.0 / len(self.chapters)
-        print '\r%s %.2f%% (%d/%d) %s' % (
-        self.bookname, percent, self.num, len(self.chapters), self.chapters[index]["title"]),
+        str = '%s [%.2f%%] (%d/%d) %s' % (self.bookname, percent, self.num, len(self.chapters), self.chapters[index]["title"])
+        print '\r%s\t' % str,
+        sys.stdout.flush()
         self.mutex.release()
 
     def save_epub(self):
