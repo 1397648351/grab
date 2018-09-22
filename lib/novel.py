@@ -31,6 +31,7 @@ class Novel:
         self.version = '1.0'
         self.mutex = threading.Lock()
         self.coexist = 5
+        self.num = 0
         self.driverName = self.Chrome
         self.driver = None
         self.type = download_mode
@@ -191,7 +192,9 @@ class Novel:
             folder = os.path.exists('%s/%s/%s' % (self.path, self.bookname, file_name))
             if folder:
                 self.mutex.acquire()
-                print '%s %s 已存在！' % (self.bookname, self.chapters[index]["title"])
+                self.num += 1
+                percent = self.num * 100.0 / len(self.chapters)
+                print '\r%s %.2f%% %s 已存在！' % (self.bookname, percent, self.chapters[index]["title"]),
                 self.mutex.release()
                 return
             if self.settings['page']['link_concat']:
@@ -202,7 +205,7 @@ class Novel:
             html = html.decode(self.settings['decode'], 'ignore')
         except Exception, e:
             self.mutex.acquire()
-            print _url, e.message
+            print '\r%s %s' % (_url, e.message),
             self.mutex.release()
             time.sleep(1)
             self.get_chapter_content(index, url)
@@ -301,7 +304,10 @@ class Novel:
         with open('%s/%s/%s' % (self.path, self.bookname, file_name), 'w') as f:
             f.write(contents)
         self.mutex.acquire()
-        print self.bookname, '%d/%d' % (index + 1, len(self.chapters)), self.chapters[index]["title"]
+        self.num += 1
+        percent = self.num * 100.0 / len(self.chapters)
+        print '\r%s %.2f%% (%d/%d) %s' % (
+        self.bookname, percent, self.num, len(self.chapters), self.chapters[index]["title"]),
         self.mutex.release()
 
     def save_epub(self):
@@ -313,4 +319,4 @@ class Novel:
         with zipfile.ZipFile('%s/%s.epub' % (self.path, self.bookname), 'a') as file:
             file.write(os.path.join(self.template, 'mimetype'), 'mimetype')
         shutil.rmtree('%s/%s' % (self.path, self.bookname))  # 递归删除文件夹
-        print self.bookname + '.epub 完成'
+        print '\r%s.epub 完成' % self.bookname
