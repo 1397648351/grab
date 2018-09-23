@@ -295,8 +295,11 @@ class Novel:
         content = content.replace(self.chapters[index]['title'], '').replace(
             self.chapters[index]['title'].replace(' ', ''), '')
         for item in self.str_replace:
-            item = item.replace('__BOOKNAME__', self.bookname)
-            content = content.replace(item, '')
+            if not isinstance(item, list):
+                item = item.replace('__BOOKNAME__', self.bookname)
+                content = content.replace(item, '')
+            else:
+                content, num = re.subn(item[0], item[1], content, flags=re.M)
         _list = content.split('<br/>')
         contents = ''
         for item in _list:

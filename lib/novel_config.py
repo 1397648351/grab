@@ -37,7 +37,7 @@ settings = [
             'link_concat': True
         },
         'chapter': {
-            'rm_eles': [],
+            'rm_eles': ['#chaptercontent #tac'],
             'content': '#chaptercontent',
             'gzip': False
         },

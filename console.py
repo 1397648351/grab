@@ -1,29 +1,26 @@
 # !/usr/bin/env python
-# -*-coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import sys
 import pyttsx
+import re
 import os
 import time
 
 reload(sys)
 sys.setdefaultencoding('UTF-8')
 
-
 if __name__ == "__main__":
-    engine = pyttsx.init()
-    engine.setProperty('volume',1.0)
-    engine.setProperty('rate',200)
-    engine.say('aaaaaaaaaaa')
-    engine.runAndWait()
-    '''
-    strs = [
-        u'修炼狂潮 \033[32m[42.49%]\033[0m 第九百二十二章 一夜之间，仿佛天塌地陷【六更，求订阅】 已存在！',
-        u'修炼狂潮 \033[32m[42.91%]\033[0m 第九百三十章 群凶出牢笼，形势危如累卵 已存在！',
-        u'修炼狂潮 \033[32m[47.31%]\033[0m 大家六一节快乐！求月票！ 已存在！'
-    ]
-    for str in strs:
-        print '\r%s' % str,
-        sys.stdout.flush()
-        time.sleep(1)
-    '''
+    res = [r'(</p><p>[。，“]).*最新章节(</p>)', r'\1\2']
+    with open('file/temp.xhtml', 'r') as f:
+        _str = f.read()
+        _str, n = re.subn(res[0], res[1], _str)
+        print n
+        with open('file/temp1.xhtml', 'w') as f1:
+            f1.write(_str)
+    # _str = '不过对于楚云凡来说，还是很兴奋的，从小他也没能接触到武技，虽然他知道，现在这年头要学武技很简单，一些低级的武技，在网上都可以学的到，只要付出一些金钱就可以了。英雄联盟之灾变时代最新章节'
+    # engine = pyttsx.init()
+    # engine.setProperty('volume',1.0)
+    # engine.setProperty('rate',200)
+    # engine.say('第九百二十二章')
+    # engine.runAndWait()leep(1)
