@@ -196,8 +196,8 @@ class Novel:
                 self.mutex.acquire()
                 self.num += 1
                 percent = self.num * 100.0 / len(self.chapters)
-                # print '\r%s [%.2f%%] %s 已存在！ ' % (self.bookname, percent, self.chapters[index]["title"]),
-                _str = '%s [%.2f%%] %s 已存在！ ' % (self.bookname, percent, self.chapters[index]["title"])
+                _str = '%s [%.2f%%] (%d/%d) 已存在！' % (self.bookname, percent, self.num, len(self.chapters))
+                # _str = '%s [%.2f%%] %s 已存在！' % (self.bookname, percent, self.chapters[index]["title"])
                 print '\r%s' % _str,
                 sys.stdout.flush()
                 self.mutex.release()
@@ -211,7 +211,7 @@ class Novel:
         except Exception, e:
             self.mutex.acquire()
             # print '\r%s %s ' % (_url, e.message),
-            print '\n%s %s' % (_url, e.message)
+            print '%s %s' % (_url, e.message)
             sys.stdout.flush()
             self.mutex.release()
             time.sleep(1)
@@ -231,9 +231,11 @@ class Novel:
             th = threading.Thread(target=self.get_chapter_content, args=(chapter['index'] - 1, chapter['href'],))
             th.start()
             threads.append(th)
-            if len(threads) >= self.coexist:
+            while len(threads) >= self.coexist:
+                for inx, th in enumerate(threads):
+                    if not th.isAlive():
+                        threads.pop(inx).join()
                 # while len(threads) > 0:
-                threads.pop(0).join()
         while len(threads) > 0:
             threads.pop(0).join()
 
@@ -294,12 +296,12 @@ class Novel:
             return
         content = content.replace(self.chapters[index]['title'], '').replace(
             self.chapters[index]['title'].replace(' ', ''), '')
-        for item in self.str_replace:
-            if not isinstance(item, list):
-                item = item.replace('__BOOKNAME__', self.bookname)
-                content = content.replace(item, '')
-            else:
-                content, num = re.subn(item[0], item[1], content, flags=re.M)
+        # for item in self.str_replace:
+        #     if not isinstance(item, list):
+        #         item = item.replace('__BOOKNAME__', self.bookname)
+        #         content = content.replace(item, '')
+        #     else:
+        #         content, num = re.subn(item[0], item[1], content, flags=re.M)
         _list = content.split('<br/>')
         contents = ''
         for item in _list:
@@ -309,6 +311,12 @@ class Novel:
             if not item:
                 continue
             contents += '<p>' + item + '</p>'
+        for item in self.str_replace:
+            if not isinstance(item, list):
+                item = item.replace('__BOOKNAME__', self.bookname)
+                contents = contents.replace(item, '')
+            else:
+                contents, num = re.subn(item[0], item[1], contents, flags=re.M)
         with open(os.path.join(self.template, 'temp_chapter.xhtml'), 'r') as f:
             contents = f.read().replace('__CONTENT__', contents).replace('__TITLE__', self.chapters[index]['title'])
         with open('%s/%s/%s' % (self.path, self.bookname, file_name), 'w') as f:
@@ -318,7 +326,7 @@ class Novel:
         percent = self.num * 100.0 / len(self.chapters)
         _str = '%s [%.2f%%] (%d/%d) %s' % (
             self.bookname, percent, self.num, len(self.chapters), self.chapters[index]["title"])
-        print '\r%s\t' % _str,
+        print '\r%s' % _str
         sys.stdout.flush()
         self.mutex.release()
 

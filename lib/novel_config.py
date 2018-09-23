@@ -143,4 +143,5 @@ str_replace = [
     '【品文移动阅读-m.pinwenba】', '(  全文阅读)', 'rgstt', 'cqhtg',
     '.co', 'tyjiao', 'tangkx', 'js518pinwenba', 'jlgxhqpinwenba', 'jiaoyu123', 'yacht4s',
     'hotensharepinwenba', 'hotenshare', 'pinwenba', 'weibogg', '【品-文-吧】',
+    [ur'(?<=[。，”！？]).{1,16}最新章节', ur''], [ur'<p>.{1,16}最新章节</p>', ur'']
 ]
