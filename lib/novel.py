@@ -196,7 +196,7 @@ class Novel:
                 self.mutex.acquire()
                 self.num += 1
                 percent = self.num * 100.0 / len(self.chapters)
-                _str = '%s [%.2f%%] (%d/%d) 已存在！' % (self.bookname, percent, self.num, len(self.chapters))
+                _str = '%s [%.2f%%] (%d/%d) %d 已存在！' % (self.bookname, percent, self.num, len(self.chapters), index)
                 # _str = '%s [%.2f%%] %s 已存在！' % (self.bookname, percent, self.chapters[index]["title"])
                 print '\r%s' % _str,
                 sys.stdout.flush()
@@ -324,8 +324,8 @@ class Novel:
         self.mutex.acquire()
         self.num += 1
         percent = self.num * 100.0 / len(self.chapters)
-        _str = '%s [%.2f%%] (%d/%d) %s' % (
-            self.bookname, percent, self.num, len(self.chapters), self.chapters[index]["title"])
+        _str = '%s [%.2f%%] (%d/%d) %d %s' % (
+            self.bookname, percent, self.num, len(self.chapters), index, self.chapters[index]["title"])
         print '\r%s' % _str
         sys.stdout.flush()
         self.mutex.release()
@@ -340,3 +340,5 @@ class Novel:
             file.write(os.path.join(self.template, 'mimetype'), 'mimetype')
         shutil.rmtree('%s/%s' % (self.path, self.bookname))  # 递归删除文件夹
         print '\r%s.epub 完成' % self.bookname
+        path = os.path.abspath('%s' % self.path)
+        os.system('explorer "%s"' % path)
