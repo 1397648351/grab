@@ -2,6 +2,7 @@
 
 import sys
 import os
+import re
 import time
 import threading
 import shutil
@@ -56,13 +57,6 @@ class Novel:
             self.get_chapters()
         else:
             self.get_book(book)
-
-    def clearline(self):
-        str = ''
-        if self.strlen >0 :
-            for i in xrange(self.strlen):
-                str += ' '
-            print '\r%s' % str,
 
     def get_book(self, bookname):
         if not isinstance(bookname, unicode):
@@ -142,8 +136,8 @@ class Novel:
             raise Exception('抓取网页失败！')
         print "《%s》开始抓取" % self.bookname
         self.create_path()
-        list = introduction.split('<br/>')
-        for item in list:
+        _list = introduction.split('<br/>')
+        for item in _list:
             if not item:
                 continue
             item = item.strip()
@@ -203,8 +197,8 @@ class Novel:
                 self.num += 1
                 percent = self.num * 100.0 / len(self.chapters)
                 # print '\r%s [%.2f%%] %s 已存在！ ' % (self.bookname, percent, self.chapters[index]["title"]),
-                str = '%s [%.2f%%] %s 已存在！ ' % (self.bookname, percent, self.chapters[index]["title"])
-                print '\r%s' % str,
+                _str = '%s [%.2f%%] %s 已存在！ ' % (self.bookname, percent, self.chapters[index]["title"])
+                print '\r%s' % _str,
                 sys.stdout.flush()
                 self.mutex.release()
                 return
@@ -303,9 +297,9 @@ class Novel:
         for item in self.str_replace:
             item = item.replace('__BOOKNAME__', self.bookname)
             content = content.replace(item, '')
-        list = content.split('<br/>')
+        _list = content.split('<br/>')
         contents = ''
-        for item in list:
+        for item in _list:
             if not item:
                 continue
             item = item.strip()
@@ -319,8 +313,9 @@ class Novel:
         self.mutex.acquire()
         self.num += 1
         percent = self.num * 100.0 / len(self.chapters)
-        str = '%s [%.2f%%] (%d/%d) %s' % (self.bookname, percent, self.num, len(self.chapters), self.chapters[index]["title"])
-        print '\r%s\t' % str,
+        _str = '%s [%.2f%%] (%d/%d) %s' % (
+            self.bookname, percent, self.num, len(self.chapters), self.chapters[index]["title"])
+        print '\r%s\t' % _str,
         sys.stdout.flush()
         self.mutex.release()
 
