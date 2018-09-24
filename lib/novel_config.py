@@ -69,7 +69,7 @@ settings = [
         },
     },
     {
-        'home': 'http://www.22ff.com',
+        'home': 'https://www.22ff.org/',
         'decode': 'gbk',
         'book': {
             'input': 'sk',
