@@ -3,3 +3,6 @@ file
 file.zip
 *.pyc
 *.log
+*.spec
+dist
+build
