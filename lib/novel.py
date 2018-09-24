@@ -28,12 +28,12 @@ class Novel:
     Edge = 2
     Ie = 3
 
-    def __init__(self, book, mode=Search_ID, download_mode=Normal, website=config.xiashu):
+    def __init__(self, book, mode=Search_ID, download_mode=Normal, website=config.xiashu, driver_name=Chrome):
         self.version = '1.0'
         self.mutex = threading.Lock()
         self.coexist = 5
         self.num = 0
-        self.driverName = self.Chrome
+        self.driverName = driver_name
         self.driver = None
         self.type = download_mode
         self.url_page = ''
@@ -340,5 +340,3 @@ class Novel:
             file.write(os.path.join(self.template, 'mimetype'), 'mimetype')
         shutil.rmtree('%s/%s' % (self.path, self.bookname))  # 递归删除文件夹
         print '\r%s.epub 完成' % self.bookname
-        path = os.path.abspath('%s' % self.path)
-        os.system('explorer "%s"' % path)
