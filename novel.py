@@ -56,7 +56,8 @@ if __name__ == "__main__":
         # engine.say(u'开始抓取 %s' % novel)
         # engine.runAndWait()
         Novel(novel, mode, down_mode, website)
-    path = os.path.abspath('file/novel')
-    os.system('explorer "%s"' % path)
+    if len(novels) > 0:
+        path = os.path.abspath('file/novel')
+        os.system('explorer /e,"%s"' % path)
     # engine.say(u'抓取完成')
     # engine.runAndWait()
