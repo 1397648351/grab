@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import os
-import re
+import sys, os, re
 # import pyttsx3 as pyttsx
 from lib.novel import Novel
 

@@ -39,8 +39,6 @@ class Novel:
                 conf = json.loads(f.read().decode('utf-8'))
                 if conf.has_key('str_replace'):
                     self.str_replace = self.str_replace + conf['str_replace']
-        print self.str_replace
-        exit(0)
         self.template = os.path.abspath('template/epub')
         self.template = os.path.join(sys.path[0], self.template)
         self.creator = ""
