@@ -44,8 +44,10 @@ if __name__ == "__main__":
                         sys.exit(0)
             else:
                 novels.append(arg)
-    else:
-        novels = [u'修炼狂潮']
+
+    # 自用
+    # else:
+    #     novels = [u'三寸人间']
 
     if not novels:
         name = raw_input(unicode('书名（多个以空格隔开）：', 'utf-8').encode('gbk'))
@@ -57,7 +59,7 @@ if __name__ == "__main__":
         # engine.runAndWait()
         Novel(novel, mode, down_mode, website)
     if len(novels) > 0:
-        path = os.path.abspath('file/novel')
+        path = os.path.join(sys.path[0], os.path.abspath('file/novel'))
         os.system('explorer /e,"%s"' % path)
     # engine.say(u'抓取完成')
     # engine.runAndWait()

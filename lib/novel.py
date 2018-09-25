@@ -1,17 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import os
-import re
-import time
-import threading
-import shutil
+import sys, os, time, re, threading, shutil, zipfile, zlib, json
+import lib.novel_config as config
 from selenium import webdriver
 from pyquery import PyQuery as pq
-import zipfile
-import zlib
-
-import lib.novel_config as config
 from lib.grab import Grab
 
 reload(sys)
@@ -42,9 +34,18 @@ class Novel:
         self.introduction = ''
         self.settings = config.settings[website]
         self.str_replace = config.str_replace
-        self.template = 'template/epub/'
+        if os.path.exists(os.path.join(sys.path[0], 'novel.json')):
+            with open(os.path.join(sys.path[0], 'novel.json')) as f:
+                conf = json.loads(f.read().decode('utf-8'))
+                if conf.has_key('str_replace'):
+                    self.str_replace = self.str_replace + conf['str_replace']
+        print self.str_replace
+        exit(0)
+        self.template = os.path.abspath('template/epub')
+        self.template = os.path.join(sys.path[0], self.template)
         self.creator = ""
-        self.path = 'file/novel'
+        self.path = os.path.abspath('file/novel')
+        self.path = os.path.join(sys.path[0], self.path)
         self.info = ''
         self.book = {}
         self.chapters = []
@@ -145,7 +146,7 @@ class Novel:
                 continue
             self.introduction += item + '<br/>'
         cover = doc(self.settings['page']['cover']).attr('src')
-        Grab.download_image(cover, '%s/%s' % (self.path, self.bookname), 'cover')
+        Grab.download_image(cover, os.path.join(self.path, self.bookname), 'cover')
         list_chapter = doc(self.settings['page']['chapters']).items()
         index = 0
         for chapter in list_chapter:
@@ -161,37 +162,41 @@ class Novel:
             })
 
     def create_path(self):
-        folder = os.path.exists('%s/%s.epub' % (self.path, self.bookname))
+        tempbookpath = os.path.join(self.path, 'temp.epub')
+        bookpath = os.path.join(self.path, '%s.epub' % self.bookname)
+        bookdirpath = os.path.join(self.path, self.bookname)
+        folder = os.path.exists(bookpath)
         if self.type == self.ReDownload:
             if folder:
-                os.remove('%s/%s.epub' % (self.path, self.bookname))
+                os.remove(bookpath)
                 folder = False
-            if os.path.exists('%s/%s' % (self.path, self.bookname)):
-                shutil.rmtree('%s/%s' % (self.path, self.bookname))
+            if os.path.exists(bookdirpath):
+                shutil.rmtree(bookdirpath)
         if folder:
-            if not os.path.exists('%s/%s' % (self.path, self.bookname)):
-                shutil.copy('%s/%s.epub' % (self.path, self.bookname), '%s/temp.epub' % self.path)
-                with zipfile.ZipFile('%s/temp.epub' % self.path) as file:
-                    file.extractall('%s/%s' % (self.path, self.bookname))
+            if not os.path.exists(bookdirpath):
+                shutil.copy(bookpath, tempbookpath)
+                with zipfile.ZipFile(tempbookpath) as file:
+                    file.extractall(bookdirpath)
                     os.remove(os.path.join(self.path, self.bookname, 'mimetype'))
-                os.remove('%s/temp.epub' % self.path)
-        folder = os.path.exists('%s/%s' % (self.path, self.bookname))
+                os.remove(tempbookpath)
+        folder = os.path.exists(bookdirpath)
         if not folder:
-            os.makedirs('%s/%s' % (self.path, self.bookname))
-        folder = os.path.exists('%s/%s/META-INF' % (self.path, self.bookname))
+            os.makedirs(bookdirpath)
+        folder = os.path.exists(os.path.join(bookdirpath, 'META-INF'))
         if not folder:
-            os.makedirs('%s/%s/META-INF' % (self.path, self.bookname))
+            os.makedirs(os.path.join(bookdirpath, 'META-INF'))
         shutil.copyfile(os.path.join(self.template, 'container.xml'),
-                        "%s/%s/META-INF/container.xml" % (self.path, self.bookname))
+                        os.path.join(bookdirpath, 'META-INF', 'container.xml'))
         shutil.copyfile(os.path.join(self.template, 'stylesheet.css'),
-                        "%s/%s/stylesheet.css" % (self.path, self.bookname))
+                        os.path.join(bookdirpath, 'META-INF', 'stylesheet.css'))
 
     def get_chapter_content(self, index, url):
         _url = url
         try:
+            bookdirpath = os.path.join(self.path, self.bookname)
             file_name = '%05d' % (index + 1)
             file_name = 'chapter_' + file_name + '.xhtml'
-            folder = os.path.exists('%s/%s/%s' % (self.path, self.bookname, file_name))
+            folder = os.path.exists(os.path.join(bookdirpath, file_name))
             if folder:
                 self.mutex.acquire()
                 self.num += 1
@@ -259,18 +264,19 @@ class Novel:
             content_toc = content_toc + '<content src="' + name + '.xhtml"/></navPoint>'
             content_opf_1 = content_opf_1 + '<item href="' + name + '.xhtml" id="id' + _name + '" media-type="application/xhtml+xml"/>'
             content_opf_2 = content_opf_2 + '<itemref idref="id' + _name + '"/>'
-        file_name = '%s/%s/catalog.xhtml' % (self.path, self.bookname)
+        bookdirpath = os.path.join(self.path, self.bookname)
+        file_name = os.path.join(bookdirpath, 'catalog.xhtml')
         with open(os.path.join(self.template, 'temp_catalog.xhtml'), 'r') as f:
             content = f.read().replace('__CONTENT__', content)
         with open(file_name, 'w') as f:
             f.write(content)
-        file_name = '%s/%s/toc.ncx' % (self.path, self.bookname)
+        file_name = os.path.join(bookdirpath, 'toc.ncx')
         with open(os.path.join(self.template, 'temp_toc.ncx'), 'r') as f:
             content_toc = f.read().replace('__CONTENT__', content_toc).replace('__TIME__', id).replace(
                 '__CREATOR__', self.creator).replace('__BOOKNAME__', self.bookname)
         with open(file_name, 'w') as f:
             f.write(content_toc)
-        file_name = '%s/%s/content.opf' % (self.path, self.bookname)
+        file_name = os.path.join(bookdirpath, 'content.opf')
         with open(os.path.join(self.template, 'temp_content.opf'), 'r') as f:
             content_opf = f.read()
             content_opf = content_opf.replace('__BOOKNAME__', self.bookname).replace('__CREATOR__',
@@ -284,24 +290,20 @@ class Novel:
             content = f.read()
         content = content.replace('__BOOKNAME__', self.bookname).replace(
             '__INTRODUCTION__', self.introduction).replace('__CREATOR__', self.creator)
-        file_name = '%s/%s/page.xhtml' % (self.path, self.bookname)
+        bookdirpath = os.path.join(self.path, self.bookname)
+        file_name = os.path.join(bookdirpath, 'page.xhtml')
         with open(file_name, 'w') as f:
             f.write(content)
 
     def create_chapter(self, index, content):
+        bookdirpath = os.path.join(self.path, self.bookname)
         file_name = '%05d' % (index + 1)
-        file_name = 'chapter_' + file_name + '.xhtml'
-        folder = os.path.exists('%s/%s/%s' % (self.path, self.bookname, file_name))
+        file_path = os.path.join(bookdirpath, 'chapter_' + file_name + '.xhtml')
+        folder = os.path.exists(file_path)
         if folder:
             return
         content = content.replace(self.chapters[index]['title'], '').replace(
             self.chapters[index]['title'].replace(' ', ''), '')
-        # for item in self.str_replace:
-        #     if not isinstance(item, list):
-        #         item = item.replace('__BOOKNAME__', self.bookname)
-        #         content = content.replace(item, '')
-        #     else:
-        #         content, num = re.subn(item[0], item[1], content, flags=re.M)
         _list = content.split('<br/>')
         contents = ''
         for item in _list:
@@ -319,7 +321,7 @@ class Novel:
                 contents, num = re.subn(item[0], item[1], contents, flags=re.M)
         with open(os.path.join(self.template, 'temp_chapter.xhtml'), 'r') as f:
             contents = f.read().replace('__CONTENT__', contents).replace('__TITLE__', self.chapters[index]['title'])
-        with open('%s/%s/%s' % (self.path, self.bookname, file_name), 'w') as f:
+        with open(file_path, 'w') as f:
             f.write(contents)
         self.mutex.acquire()
         self.num += 1
@@ -331,12 +333,15 @@ class Novel:
         self.mutex.release()
 
     def save_epub(self):
-        folder = os.path.exists('%s/%s.epub' % (self.path, self.bookname))
+        bookdirpath = os.path.join(self.path, self.bookname)
+        bookpath = os.path.join(self.path, '%s.epub' % self.bookname)
+        zippath = os.path.join(self.path, '%s.zip' % self.bookname)
+        folder = os.path.exists(bookpath)
         if folder:
-            os.remove('%s/%s.epub' % (self.path, self.bookname))
-        shutil.make_archive('%s/%s' % (self.path, self.bookname), 'zip', '%s/%s' % (self.path, self.bookname))
-        os.rename('%s/%s.zip' % (self.path, self.bookname), '%s/%s.epub' % (self.path, self.bookname))
-        with zipfile.ZipFile('%s/%s.epub' % (self.path, self.bookname), 'a') as file:
+            os.remove(bookpath)
+        shutil.make_archive(bookdirpath, 'zip', bookdirpath)
+        os.rename(zippath, bookpath)
+        with zipfile.ZipFile(bookpath, 'a') as file:
             file.write(os.path.join(self.template, 'mimetype'), 'mimetype')
-        shutil.rmtree('%s/%s' % (self.path, self.bookname))  # 递归删除文件夹
+        shutil.rmtree(bookdirpath)  # 递归删除文件夹
         print '\r%s.epub 完成' % self.bookname
