@@ -76,7 +76,7 @@ class Novel:
             input.send_keys(bookname)
             submit = self.driver.find_element_by_id(self.settings['book']['submit'])
             submit.click()
-            html = self.driver.page_source.decode('utf-8', 'ignore')
+            html = self.driver.page_source.decode(self.settings['decode'], 'ignore')
             html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
                 'xmlns="http://www.w3.org/1999/xhtml"', '')
             doc = pq(html)
@@ -111,7 +111,7 @@ class Novel:
             if self.settings['page']['do']:
                 self.settings['page']['do'](self.driver)
             html = self.driver.page_source
-            html = self.driver.page_source.decode('utf-8', 'ignore')
+            html = html.decode(self.settings['decode'], 'ignore')
             html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
                 'xmlns="http://www.w3.org/1999/xhtml"', '')
         except Exception, ex:
