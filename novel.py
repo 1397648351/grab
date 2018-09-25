@@ -57,7 +57,7 @@ if __name__ == "__main__":
         # engine.runAndWait()
         Novel(novel, mode, down_mode, website)
     if len(novels) > 0:
-        path = os.path.join(sys.path[0], 'file/novel')
-        os.system('explorer /e,"%s"' % path)
+        path = os.path.abspath(os.path.join(sys.path[0], 'file/novel', '%s.epub' % novels[0]))
+        os.system('explorer /e,/select,"%s"' % path)
     # engine.say(u'抓取完成')
     # engine.runAndWait()
