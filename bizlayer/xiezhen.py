@@ -52,6 +52,10 @@ class Xiezhen:
             if page != 0:
                 url = 'list_%d_%d.html' % (self.kinds[self.kind], page + 1)
             self.get_page(self.url + url)
+        while len(self.threads) > 0:
+            for i, _th in enumerate(self.threads):
+                if not _th.isAlive():
+                    self.threads.pop(i).join()
 
     def get_page(self, url):
         try:
@@ -69,11 +73,6 @@ class Xiezhen:
                     for i, _th in enumerate(self.threads):
                         if not _th.isAlive():
                             self.threads.pop(i).join()
-            while len(self.threads) > 0:
-                for i, _th in enumerate(self.threads):
-                    if not _th.isAlive():
-                        self.threads.pop(i).join()
-                # page('a').text(),page('a').attr('href')
         except Exception, e:
             print str(e)
 
