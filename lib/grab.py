@@ -7,14 +7,11 @@ sys.setdefaultencoding('utf-8')
 
 
 class Grab:
-    user_agent = [
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.92 Safari/537.36',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:60.0) Gecko/20100101 Firefox/60.0']
-    headers = {
-        'User-Agent': user_agent[0],
-        'Cache-Control': 'max-age=0',
-        'Pragma': 'no-cache'
-    }
+    headers = [{
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.92 Safari/537.36'
+    }, {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:60.0) Gecko/20100101 Firefox/60.0'
+    }]
     proxy_info = {
         'host': '115.223.205.157',
         'port': 9000
@@ -31,7 +28,7 @@ class Grab:
         self.url = url
 
     @classmethod
-    def get_content(cls, url):
+    def get_content(cls, url, headers_referer=None):
         """
         获取网页内容
         :param url:
@@ -46,9 +43,11 @@ class Grab:
             opener = urllib2.build_opener(proxy_support)
             # Then we install this opener as the default opener for urllib2:
             urllib2.install_opener(opener)
-        index = random.randint(0, len(cls.user_agent) - 1)
-        cls.headers['User-Agent'] = cls.user_agent[index]
-        request = urllib2.Request(url, headers=cls.headers)
+        index = random.randint(0, len(cls.headers) - 1)
+        headers = cls.headers[index]
+        if headers_referer:
+            headers['Referer'] = headers_referer
+        request = urllib2.Request(url, headers=headers)
         try:
             response = urllib2.urlopen(request, timeout=cls.timeout)
             return response.read()
@@ -81,7 +80,7 @@ class Grab:
                 return None
 
     @classmethod
-    def download_image(cls, url, path, name, noprint=False):
+    def download_image(cls, url, path, name, noprint=False, headers_referer=None):
         """
         下载图片
         :param url: URL
@@ -107,7 +106,7 @@ class Grab:
                 if not noprint:
                     print "%s 已存在" % filename
                 return False
-            content = cls.get_content(url)
+            content = cls.get_content(url, headers_referer=headers_referer)
             if content:
                 with open(filename, 'wb') as f:
                     f.write(content)
