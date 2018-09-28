@@ -8,4 +8,4 @@ reload(sys)
 sys.setdefaultencoding('UTF-8')
 
 if __name__ == '__main__':
-    Xiezhen.start(2)
+    Xiezhen.start(3, 1)

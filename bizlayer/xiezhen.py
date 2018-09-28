@@ -44,6 +44,7 @@ class Xiezhen:
     def get_pages(self):
         pages = []
         if self.count != -1:
+            self.limit = self.limit - 1
             pages = xrange(self.limit, self.limit + self.count)
         else:
             pages = xrange(self.limit)
