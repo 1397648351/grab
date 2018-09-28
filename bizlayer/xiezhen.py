@@ -10,28 +10,50 @@ sys.setdefaultencoding('utf-8')
 
 
 class Xiezhen:
-    def __init__(self, limit, count=-1):
+    kinds = {
+        'xinggan': 6,
+        'qingchun': 1,
+        'xiaohua': 2,
+        'chemo': 3,
+        'qipao': 4,
+        'mingxing': 5
+    }
+
+    def __init__(self, limit, count=-1, kind='xinggan'):
         self.version = '1.0'
-        self.url = 'http://www.mm131.com/xinggan/'
+        self.home = 'http://www.mm131.com'
+        self.kind = kind
+        self.url = '%s/%s/' % (self.home, kind)
         # self.path = sys.path[0]
         syspath = sys.path[0]
-        self.path = u'file/images/写真/xingan'
+        self.path = u'file/images/写真/%s' % kind
         self.path = os.path.abspath(os.path.join(syspath, self.path))
         self.limit = limit
         self.count = count
+        self.threads = []
+        self.async = 8
         self.mutex = threading.RLock()
 
     @classmethod
-    def start(cls, limit, count=-1):
-        xz = Xiezhen(limit, count)
-        # xz.get_pages()
-        xz.download_page('http://www.mm131.com/xinggan/4384.html', 0)
+    def start(cls, limit, count=-1, kind='xinggan'):
+        xz = Xiezhen(limit, count, kind)
+        xz.get_pages()
+        # xz.download_page('http://www.mm131.com/xinggan/4384.html', 0)
         # http://www.mm131.com/xinggan/4366.html
 
     def get_pages(self):
-        url = self.url
-        if self.limit != 0 and self.count != -1:
-            pass
+        pages = []
+        if self.count != -1:
+            pages = xrange(self.limit, self.limit + self.count)
+        else:
+            pages = xrange(self.limit)
+        for page in pages:
+            url = ''
+            if page != 0:
+                url = 'list_%d_%d.html' % (self.kinds[self.kind], page + 1)
+            self.get_page(self.url + url)
+
+    def get_page(self, url):
         try:
             html = Grab.get_content(url).decode('gb2312', 'ignore')
             html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
@@ -39,7 +61,19 @@ class Xiezhen:
             doc = pq(html)
             pages = doc('.main .list-left dd[class!=page]').items()
             for page in pages:
-                print page('a').text()
+                href = page('a').attr('href')
+                th = threading.Thread(target=self.download_page, args=(href, 0,))
+                th.start()
+                self.threads.append(th)
+                while len(self.threads) >= self.async:
+                    for i, _th in enumerate(self.threads):
+                        if not _th.isAlive():
+                            self.threads.pop(i).join()
+            while len(self.threads) > 0:
+                for i, _th in enumerate(self.threads):
+                    if not _th.isAlive():
+                        self.threads.pop(i).join()
+                # page('a').text(),page('a').attr('href')
         except Exception, e:
             print str(e)
 
@@ -65,7 +99,7 @@ class Xiezhen:
             os.mkdir(path)
         self.mutex.release()
         imgsrc = doc('.content .content-pic a img').attr('src')
-        Grab.download_image(imgsrc, path, '%03d' % index, headers_referer='http://www.mm131.com')
+        Grab.download_image(imgsrc, path, '%03d' % index, noprint=False, headers_referer='http://www.mm131.com')
         next = doc('.content-page a:last')
         if next.text() != '下一页':
             next = False
