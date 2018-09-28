@@ -15,7 +15,7 @@ class Xiezhen:
         self.url = 'http://www.mm131.com/xinggan/'
         # self.path = sys.path[0]
         syspath = sys.path[0]
-        self.path = 'file/images/xingan'
+        self.path = u'file/images/写真/xingan'
         self.path = os.path.abspath(os.path.join(syspath, self.path))
         self.limit = limit
         self.count = count
@@ -25,7 +25,7 @@ class Xiezhen:
     def start(cls, limit, count=-1):
         xz = Xiezhen(limit, count)
         # xz.get_pages()
-        xz.download_page('http://www.mm131.com/xinggan/4366.html', 0)
+        xz.download_page('http://www.mm131.com/xinggan/4384.html', 0)
         # http://www.mm131.com/xinggan/4366.html
 
     def get_pages(self):
@@ -71,7 +71,7 @@ class Xiezhen:
             next = False
         if next:
             url = next.attr('href')
-            index = re.match(r'.*_([0-9]*).html', url)
+            index = re.match(r'.*_([0-9]+).html', url)
             if index:
                 index = int(index.group(1))
                 self.download_page(self.url + url, index)
