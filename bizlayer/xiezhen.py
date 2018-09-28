@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys, os, re, threading
-from grab import Grab
+from lib.grab import Grab
 from pyquery import PyQuery as pq
 
 reload(sys)

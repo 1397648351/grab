@@ -2,7 +2,7 @@
 
 import sys, os, re
 # import pyttsx3 as pyttsx
-from lib.novel import Novel
+from bizlayer.novel import Novel
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -44,8 +44,8 @@ if __name__ == "__main__":
                 novels.append(arg)
 
     # 自用
-    # else:
-    #     novels = [u'三寸人间']
+    else:
+        novels = [u'三寸人间']
 
     if not novels:
         name = raw_input(unicode('书名（多个以空格隔开）：', 'utf-8').encode('gbk'))

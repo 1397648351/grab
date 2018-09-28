@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from lib.lu import Lu
+from bizlayer.lu import Lu
 
 reload(sys)
 sys.setdefaultencoding('utf-8')

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from lib.xiezhen import Xiezhen
+from bizlayer.xiezhen import Xiezhen
 
 reload(sys)
 sys.setdefaultencoding('UTF-8')
