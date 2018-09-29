@@ -1,11 +1,11 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
+import sys, re
 from bizlayer.xiezhen import Xiezhen
 
 reload(sys)
 sys.setdefaultencoding('UTF-8')
 
 if __name__ == '__main__':
-    Xiezhen.start(3, 1)
+    Xiezhen.start(1)

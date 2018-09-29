@@ -1,7 +1,7 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, os, re, threading
+import sys, os, re, time, threading
 from lib.grab import Grab
 from pyquery import PyQuery as pq
 
@@ -31,7 +31,7 @@ class Xiezhen:
         self.limit = limit
         self.count = count
         self.threads = []
-        self.async = 8
+        self.async = 3
         self.mutex = threading.RLock()
 
     @classmethod
@@ -61,21 +61,24 @@ class Xiezhen:
     def get_page(self, url):
         try:
             html = Grab.get_content(url).decode('gb2312', 'ignore')
-            html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
-                'xmlns="http://www.w3.org/1999/xhtml"', '')
-            doc = pq(html)
-            pages = doc('.main .list-left dd[class!=page]').items()
-            for page in pages:
-                href = page('a').attr('href')
-                th = threading.Thread(target=self.download_page, args=(href, 0,))
-                th.start()
-                self.threads.append(th)
-                while len(self.threads) >= self.async:
-                    for i, _th in enumerate(self.threads):
-                        if not _th.isAlive():
-                            self.threads.pop(i).join()
         except Exception, e:
-            print str(e)
+            print str(e), url
+            time.sleep(.1)
+            self.get_page(url)
+            return
+        html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
+            'xmlns="http://www.w3.org/1999/xhtml"', '')
+        doc = pq(html)
+        pages = doc('.main .list-left dd[class!=page]').items()
+        for page in pages:
+            href = page('a').attr('href')
+            th = threading.Thread(target=self.download_page, args=(href, 0,))
+            th.start()
+            self.threads.append(th)
+            while len(self.threads) >= self.async:
+                for i, _th in enumerate(self.threads):
+                    if not _th.isAlive():
+                        self.threads.pop(i).join()
 
     def download_page(self, url, index=0):
         self.mutex.acquire()
@@ -85,15 +88,20 @@ class Xiezhen:
         try:
             html = Grab.get_content(url).decode('gb2312', 'ignore')
         except Exception, e:
-            print str(e)
+            print str(e), url
+            time.sleep(.1)
             self.download_page(url, index)
             return
         html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
             'xmlns="http://www.w3.org/1999/xhtml"', '')
         doc = pq(html)
+        id = ''
+        matchObj = re.match(r'%s([0-9]+)(_[0-9]+)?.html' % self.url, url)
+        if matchObj:
+            id = matchObj.group(1).zfill(5)
         title = doc('.content h5').text()
         title = re.sub(r'\([0-9]*\)', '', title)
-        path = os.path.join(self.path, title)
+        path = os.path.join(self.path, id + title)
         self.mutex.acquire()
         if not os.path.exists(path):
             os.mkdir(path)
