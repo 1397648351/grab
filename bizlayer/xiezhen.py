@@ -34,12 +34,12 @@ class Xiezhen:
         self.async = 3
         self.mutex = threading.RLock()
 
-    @classmethod
-    def start(cls, limit, count=-1, kind='xinggan'):
-        xz = Xiezhen(limit, count, kind)
-        xz.get_pages()
-        # xz.download_page('http://www.mm131.com/xinggan/4384.html', 0)
-        # http://www.mm131.com/xinggan/4366.html
+    def start(self):
+        th = threading.Thread(target=self.get_pages, args=())
+        th.start()
+
+    def stop(self):
+        pass
 
     def get_pages(self):
         pages = []
@@ -62,7 +62,7 @@ class Xiezhen:
         try:
             html = Grab.get_content(url).decode('gb2312', 'ignore')
         except Exception, e:
-            print str(e), url
+            print '\r' + str(e), url,
             time.sleep(.1)
             self.get_page(url)
             return
@@ -88,7 +88,7 @@ class Xiezhen:
         try:
             html = Grab.get_content(url).decode('gb2312', 'ignore')
         except Exception, e:
-            print str(e), url
+            print '\r' + str(e), url,
             time.sleep(.1)
             self.download_page(url, index)
             return
