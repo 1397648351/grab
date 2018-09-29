@@ -31,15 +31,16 @@ class Xiezhen:
         self.limit = limit
         self.count = count
         self.threads = []
-        self.async = 3
+        self.async = 8
         self.mutex = threading.RLock()
+        self.run = True
 
     def start(self):
         th = threading.Thread(target=self.get_pages, args=())
         th.start()
 
     def stop(self):
-        pass
+        self.run = False
 
     def get_pages(self):
         pages = []
@@ -49,6 +50,8 @@ class Xiezhen:
         else:
             pages = xrange(self.limit)
         for page in pages:
+            if not self.run:
+                break
             url = ''
             if page != 0:
                 url = 'list_%d_%d.html' % (self.kinds[self.kind], page + 1)
@@ -57,12 +60,14 @@ class Xiezhen:
             for i, _th in enumerate(self.threads):
                 if not _th.isAlive():
                     self.threads.pop(i).join()
+        self.run = False
 
     def get_page(self, url):
         try:
             html = Grab.get_content(url).decode('gb2312', 'ignore')
         except Exception, e:
             print '\r' + str(e), url,
+            sys.stdout.flush()
             time.sleep(.1)
             self.get_page(url)
             return
@@ -71,6 +76,8 @@ class Xiezhen:
         doc = pq(html)
         pages = doc('.main .list-left dd[class!=page]').items()
         for page in pages:
+            if not self.run:
+                break
             href = page('a').attr('href')
             th = threading.Thread(target=self.download_page, args=(href, 0,))
             th.start()
@@ -81,6 +88,8 @@ class Xiezhen:
                         self.threads.pop(i).join()
 
     def download_page(self, url, index=0):
+        if not self.run:
+            return
         self.mutex.acquire()
         if not os.path.exists(self.path):
             os.makedirs(self.path)
@@ -89,6 +98,7 @@ class Xiezhen:
             html = Grab.get_content(url).decode('gb2312', 'ignore')
         except Exception, e:
             print '\r' + str(e), url,
+            sys.stdout.flush()
             time.sleep(.1)
             self.download_page(url, index)
             return
