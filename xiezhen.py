@@ -20,7 +20,7 @@ def sigint_handler(signum, frame):
 
 
 if __name__ == '__main__':
-    xz = Xiezhen(1, kind=kinds[1])
+    xz = Xiezhen(1, kind=kinds[0])
     xz.start()
     is_stopped = False
     signal.signal(signal.SIGINT, sigint_handler)

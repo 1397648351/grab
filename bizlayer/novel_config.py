@@ -15,6 +15,8 @@ biquge = 1
 aishu = 2
 mianhuatang = 3
 
+SAVE_PATH = 'file/novel'
+
 settings = [
     {
         'home': 'https://www.xiashu.la',
