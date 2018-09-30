@@ -1,17 +1,25 @@
 # -*- coding: utf-8 -*-
 
 import sys, os, re
+import signal
 # import pyttsx3 as pyttsx
 from bizlayer.novel import Novel
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
+
 # engine = pyttsx.init()
 # engine.setProperty('volume', 1.0)  # 音量
 # engine.setProperty('rate', 200)  # 语速
 
+def signal_handler(signalnum, frame):
+    sys.exit(0)
+
+
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
     novels = []
     website = 0  # xiashu = 0, biquge = 1, aishu = 2, mianhuatang = 3
     down_mode = Novel.Normal

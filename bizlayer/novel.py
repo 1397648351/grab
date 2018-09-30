@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys, os, time, re, threading, shutil, zipfile, zlib, json
-import lib.novel_config as config
+import novel_config as config
 from selenium import webdriver
 from pyquery import PyQuery as pq
 from lib.grab import Grab
