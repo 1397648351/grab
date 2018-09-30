@@ -1,8 +1,7 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, re, signal, time
-import string
+import sys, signal
 from bizlayer.xiezhen import Xiezhen
 
 reload(sys)
