@@ -20,10 +20,12 @@ def sigint_handler(signum, frame):
 
 
 if __name__ == '__main__':
-    xz = Xiezhen(1, kind=kinds[0])
-    xz.start()
     is_stopped = False
+    xz = Xiezhen(1, kind=kinds[0])
+
     signal.signal(signal.SIGINT, sigint_handler)
     signal.signal(signal.SIGTERM, sigint_handler)
+
+    xz.start()
     while not is_stopped and xz.run:
         pass

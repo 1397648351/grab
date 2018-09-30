@@ -30,14 +30,20 @@ class Xiezhen:
         self.path = os.path.abspath(os.path.join(syspath, self.path))
         self.limit = limit
         self.count = count
+        self.items = []
         self.threads = []
+        self.total = 0
+        self.index = 0
         self.async = 8
         self.mutex = threading.RLock()
         self.run = True
 
     def start(self):
-        th = threading.Thread(target=self.get_pages, args=())
-        th.start()
+        print u'正在获取图片资源...'
+        self.get_pages()
+        print u'开始下载....'
+        self.download_items()
+        self.run = False
 
     def stop(self):
         self.run = False
@@ -55,31 +61,31 @@ class Xiezhen:
             url = ''
             if page != 0:
                 url = 'list_%d_%d.html' % (self.kinds[self.kind], page + 1)
-            self.get_page(self.url + url)
+            self.get_page_items(self.url + url)
         while len(self.threads) > 0:
             for i, _th in enumerate(self.threads):
                 if not _th.isAlive():
                     self.threads.pop(i).join()
-        self.run = False
 
-    def get_page(self, url):
+    def get_page_items(self, url):
         try:
             html = Grab.get_content(url).decode('gb2312', 'ignore')
         except Exception, e:
             print '\r' + str(e), url,
             sys.stdout.flush()
-            time.sleep(.1)
-            self.get_page(url)
-            return
+            if self.run:
+                time.sleep(.1)
+                self.get_page(url)
+                return
         html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
             'xmlns="http://www.w3.org/1999/xhtml"', '')
         doc = pq(html)
-        pages = doc('.main .list-left dd[class!=page]').items()
-        for page in pages:
+        items = doc('.main .list-left dd[class!=page]').items()
+        for item in items:
             if not self.run:
                 break
-            href = page('a').attr('href')
-            th = threading.Thread(target=self.download_page, args=(href, 0,))
+            href = item('a').attr('href')
+            th = threading.Thread(target=self.get_item_info, args=(href,))
             th.start()
             self.threads.append(th)
             while len(self.threads) >= self.async:
@@ -87,43 +93,78 @@ class Xiezhen:
                     if not _th.isAlive():
                         self.threads.pop(i).join()
 
-    def download_page(self, url, index=0):
-        if not self.run:
-            return
-        self.mutex.acquire()
-        if not os.path.exists(self.path):
-            os.makedirs(self.path)
-        self.mutex.release()
+    def get_item_info(self, url):
         try:
             html = Grab.get_content(url).decode('gb2312', 'ignore')
         except Exception, e:
             print '\r' + str(e), url,
             sys.stdout.flush()
-            time.sleep(.1)
-            self.download_page(url, index)
-            return
+            if self.run:
+                time.sleep(.1)
+                self.get_item_info(url)
+                return
         html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
             'xmlns="http://www.w3.org/1999/xhtml"', '')
         doc = pq(html)
-        id = ''
+        info = {
+            'id': '',
+            'title': doc('.content h5').text().strip(),
+            'count': 0
+        }
         matchObj = re.match(r'%s([0-9]+)(_[0-9]+)?.html' % self.url, url)
         if matchObj:
-            id = matchObj.group(1).zfill(5)
-        title = doc('.content h5').text()
-        title = re.sub(r'\([0-9]*\)', '', title)
-        path = os.path.join(self.path, id + title)
+            info['id'] = matchObj.group(1)
+        count = doc('.content-page span:first').text().strip()
+        matchObj = re.match(ur'共([0-9]+)页', count)
+        if matchObj:
+            info['count'] = int(matchObj.group(1))
+        self.mutex.acquire()
+        self.items.append(info)
+        self.total += info['count']
+        self.mutex.release()
+
+    def down_img(self, index):
+        # http://img1.mm131.me/pic/4190/36.jpg
+        self.mutex.acquire()
+        if not os.path.exists(self.path):
+            os.makedirs(self.path)
+        self.mutex.release()
+
+    def download_items(self):
+        for index, item in enumerate(self.items):
+            if not self.run:
+                break
+            for i in xrange(item['count']):
+                if not self.run:
+                    break
+                th = threading.Thread(target=self.download_img, args=(index, i + 1,))
+                th.start()
+                self.threads.append(th)
+                while len(self.threads) >= self.async:
+                    for j, _th in enumerate(self.threads):
+                        if not _th.isAlive():
+                            self.threads.pop(j).join()
+        while len(self.threads) > 0:
+            for i, _th in enumerate(self.threads):
+                if not _th.isAlive():
+                    self.threads.pop(i).join()
+
+    def download_img(self, index, i):
+        path = os.path.join(self.path, '%s%s' % (self.items[index]['id'].zfill(5), self.items[index]['title']))
         self.mutex.acquire()
         if not os.path.exists(path):
-            os.mkdir(path)
+            os.makedirs(path)
         self.mutex.release()
-        imgsrc = doc('.content .content-pic a img').attr('src')
-        Grab.download_image(imgsrc, path, '%03d' % index, noprint=False, headers_referer='http://www.mm131.com')
-        next = doc('.content-page a:last')
-        if next.text() != '下一页':
-            next = False
-        if next:
-            url = next.attr('href')
-            index = re.match(r'.*_([0-9]+).html', url)
-            if index:
-                index = int(index.group(1))
-                self.download_page(self.url + url, index)
+        src = 'http://img1.mm131.me/pic/%s/%d.jpg' % (self.items[index]['id'], i)
+        try:
+            Grab.download_image(src, path, '%03d' % i, noprint=True, headers_referer='http://www.mm131.com')
+            self.mutex.acquire()
+            self.index += 1
+            percent = self.index * 100.0 / self.total
+            print '\r%.2f%%' % percent,
+            sys.stdout.flush()
+            self.mutex.release()
+        except Exception:
+            if self.run:
+                time.sleep(.1)
+                self.download_img(index, i)
