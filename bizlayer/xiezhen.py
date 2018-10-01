@@ -50,6 +50,7 @@ class Xiezhen:
 
     def get_pages(self):
         pages = []
+        threads = []
         if self.count != -1:
             self.limit = self.limit - 1
             pages = xrange(self.limit, self.limit + self.count)
@@ -61,7 +62,15 @@ class Xiezhen:
             url = ''
             if page != 0:
                 url = 'list_%d_%d.html' % (self.kinds[self.kind], page + 1)
-            self.get_page_items(self.url + url)
+            th = threading.Thread(target=self.get_page_items, args=(self.url + url,))
+            th.start()
+            threads.append(th)
+            # self.get_page_items(self.url + url)
+            while len(threads) >= self.async / 2:
+                for i, _th in enumerate(threads):
+                    if not _th.isAlive():
+                        threads.pop(i).join()
+        self.threads = self.threads + threads
         while len(self.threads) > 0:
             for i, _th in enumerate(self.threads):
                 if not _th.isAlive():
@@ -81,17 +90,19 @@ class Xiezhen:
             'xmlns="http://www.w3.org/1999/xhtml"', '')
         doc = pq(html)
         items = doc('.main .list-left dd[class!=page]').items()
+        threads = []
         for item in items:
             if not self.run:
                 break
             href = item('a').attr('href')
             th = threading.Thread(target=self.get_item_info, args=(href,))
             th.start()
-            self.threads.append(th)
-            while len(self.threads) >= self.async:
-                for i, _th in enumerate(self.threads):
+            threads.append(th)
+            while len(threads) >= self.async / 2:
+                for i, _th in enumerate(threads):
                     if not _th.isAlive():
-                        self.threads.pop(i).join()
+                        threads.pop(i).join()
+        self.threads = self.threads + threads
 
     def get_item_info(self, url):
         try:
