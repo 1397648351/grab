@@ -19,7 +19,7 @@ class Xiezhen:
         'mingxing': 5
     }
 
-    def __init__(self, limit, count=-1, kind='xinggan'):
+    def __init__(self, limit, to=0, kind='xinggan'):
         self.version = '1.0'
         self.home = 'http://www.mm131.com'
         self.kind = kind
@@ -29,7 +29,7 @@ class Xiezhen:
         self.path = u'file/images/写真/%s' % kind
         self.path = os.path.abspath(os.path.join(syspath, self.path))
         self.limit = limit
-        self.count = count
+        self.to = to
         self.items = []
         self.threads = []
         self.total = 0
@@ -51,9 +51,8 @@ class Xiezhen:
     def get_pages(self):
         pages = []
         threads = []
-        if self.count != -1:
-            self.limit = self.limit - 1
-            pages = xrange(self.limit, self.limit + self.count)
+        if self.to != 0:
+            pages = xrange(self.limit - 1, self.to)
         else:
             pages = xrange(self.limit)
         for page in pages:
