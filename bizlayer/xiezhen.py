@@ -41,6 +41,7 @@ class Xiezhen:
     def start(self):
         print u'正在获取图片资源...'
         self.get_pages()
+        print u'共计%d项，%d张。' % (len(self.items), self.total)
         print u'开始下载....'
         self.download_items()
         self.run = False
