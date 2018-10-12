@@ -184,7 +184,7 @@ class Novel:
         shutil.copyfile(os.path.join(self.template, 'container.xml'),
                         os.path.join(bookdirpath, 'META-INF', 'container.xml'))
         shutil.copyfile(os.path.join(self.template, 'stylesheet.css'),
-                        os.path.join(bookdirpath, 'META-INF', 'stylesheet.css'))
+                        os.path.join(bookdirpath, 'stylesheet.css'))
 
     def get_chapter_content(self, index, url):
         _url = url

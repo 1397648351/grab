@@ -144,6 +144,6 @@ str_replace = [
     '高速首发__BOOKNAME__最新章节，本章节是地址为如果你觉的本章节还不错的话请不要忘记向您qq群和微博里的朋友推荐哦！',
     '【品文移动阅读-m.pinwenba】', '(  全文阅读)', 'rgstt', 'cqhtg',
     '.co', 'tyjiao', 'tangkx', 'js518pinwenba', 'jlgxhqpinwenba', 'jiaoyu123', 'yacht4s',
-    'hotensharepinwenba', 'hotenshare', 'pinwenba', 'weibogg', '【品-文-吧】',
+    'hotensharepinwenba', 'hotenshare', 'pinwenba', 'weibogg', '【品-文-吧】','read3();',
     [ur'(?<=[。，”！？]).{1,16}最新章节', ur''], [ur'<p>.{1,16}最新章节</p>', ur'']
 ]
