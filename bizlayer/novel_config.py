@@ -14,6 +14,7 @@ xiashu = 0
 biquge = 1
 aishu = 2
 mianhuatang = 3
+blvo = 4
 
 SAVE_PATH = 'file/novel'
 
@@ -121,7 +122,33 @@ settings = [
             'content': '#zjneirong',
             'gzip': False
         },
-    }
+    },
+    {
+        'home': 'https://www.80vo.com/',
+        'decode': 'utf-8',
+        'book': {
+            'input': 'shuming',
+            'submit': 'submitbtn',
+            'link': '#waterfall .item.masonry-brick',
+            'href': '.title h3 a',
+            'link_replace': '/api/ajax/searchid.php?id='
+        },
+        'page': {
+            'rm_eles': ['#aboutbook a.fr', '#aboutbook h3'],
+            'do': ele_click,
+            'name': '#info .infotitle h1',
+            'introduction': '#aboutbook',
+            'creator': '.ainfo .username a',
+            'cover': '#picbox .img_in img',
+            'chapters': '#detaillist ul li',
+            'link_concat': True
+        },
+        'chapter': {
+            'rm_eles': ['#chaptercontent #tac'],
+            'content': '#chaptercontent',
+            'gzip': False
+        },
+    },
 ]
 
 str_replace = [
@@ -132,8 +159,9 @@ str_replace = [
     '( $>>>棉、花‘糖’小‘說’)', '( )', '（ ）', '[ ]', '（ 棉花糖', '( ’)', '【】',
     '[看本书最新章节请到]', '[更新快，网站页面清爽，广告少，，最喜欢这种网站了，一定要好评]',
     '其c他都5是w盗版0`', '天才壹秒記住愛♂去÷小說→網，為您提供精彩小說閱讀。',
-    '~搜搜篮色，即可全文阅读后面章节', '-79-', '-79xs-', '&amp;nnsp;',
-    '最新章节全文阅读。更多最新章节访问:ww 。', '。 更新好快。',
+    '~搜搜篮色，即可全文阅读后面章节', '-79-', '-79xs-', '&amp;nnsp;', '天才壹秒記住『笔下文学 qu 】”',
+    '天才壹秒記住『笔下文学 qu 】',
+    '最新章节全文阅读。更多最新章节访问:ww 。', '。 更新好快。', '天才壹秒記住『笔下文学 』，為您提供精彩小說閱讀。',
     '最新章节全文阅读', '。更多最新章节访问:ww 。', 'ＷｗΔＷ．『ksnhuge『ge．La',
     '[想看的书几乎都有啊，比一般的站要稳定很多更新还快，全文字的没有广告。]',
     '恋上你看书网 630bookla ，最快更新神豪无极限最新章节！', 'readx;',
@@ -142,8 +170,9 @@ str_replace = [
     'woquge', 'biquge5200', '恋上你看书网 630bookla ，最快更新__BOOKNAME__最新章节！',
     '〖∷更新快∷无弹窗∷纯文字∷〗', '(请搜索八一，更新最快的站!)', '(请搜索八一，或者直接输入看最新章节)',
     '高速首发__BOOKNAME__最新章节，本章节是地址为如果你觉的本章节还不错的话请不要忘记向您qq群和微博里的朋友推荐哦！',
-    '【品文移动阅读-m.pinwenba】', '(  全文阅读)', 'rgstt', 'cqhtg',
+    '【品文移动阅读-m.pinwenba】', '(  全文阅读)', 'rgstt', 'cqhtg', '{][la}',
     '.co', 'tyjiao', 'tangkx', 'js518pinwenba', 'jlgxhqpinwenba', 'jiaoyu123', 'yacht4s',
-    'hotensharepinwenba', 'hotenshare', 'pinwenba', 'weibogg', '【品-文-吧】','read3();',
+    'hotensharepinwenba', 'hotenshare', 'pinwenba', 'weibogg', '【品-文-吧】', 'read3();',
+    'ｗww.ranwen.orｇ?', '手机用户请浏览阅读，更优质的阅读体验。',
     [ur'(?<=[。，”！？]).{1,16}最新章节', ur''], [ur'<p>.{1,16}最新章节</p>', ur'']
 ]

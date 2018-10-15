@@ -16,7 +16,7 @@ class Lu:
 
     def __init__(self, type, start, end):
         self.version = '1.0'
-        self.homepage = 'http://6666av.vip'
+        self.homepage = 'http://111av.org'
         self.start = start
         self.end = end
         self.type = type
