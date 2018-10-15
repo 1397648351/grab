@@ -98,7 +98,7 @@ settings = [
     },
     {
         'home': 'http://www.mianhuatang520.com/',
-        'decode': 'gbk',
+        'decode': 'GB2312',
         'book': {
             'input': 'bookname',
             'submit': 'sss',

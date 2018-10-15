@@ -21,7 +21,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     novels = []
-    website = 0  # xiashu = 0, biquge = 1, aishu = 2, mianhuatang = 3
+    website = 3  # xiashu = 0, biquge = 1, aishu = 2, mianhuatang = 3
     down_mode = Novel.Normal
     mode = Novel.Search_Name
     driver_name = Novel.Chrome
@@ -52,8 +52,8 @@ if __name__ == "__main__":
                 novels.append(arg)
 
     # 自用
-    else:
-        novels = [u'三寸人间']
+    # else:
+    #     novels = [u'雪中悍刀行']
 
     if not novels:
         name = raw_input(unicode('书名（多个以空格隔开）：', 'utf-8').encode('gbk'))
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         # engine.runAndWait()
         Novel(novel, mode, down_mode, website)
     if len(novels) > 0:
-        path = os.path.abspath(os.path.join(sys.path[0], 'file/novel', '%s.epub' % novels[0]))
-        os.system('explorer /e,/select,"%s"' % path)
+        path = os.path.abspath(os.path.join(sys.path[0], 'file/novel')) #, '%s.epub' % novels[0]
+        os.system('explorer /e,"%s"' % path)
     # engine.say(u'抓取完成')
     # engine.runAndWait()
