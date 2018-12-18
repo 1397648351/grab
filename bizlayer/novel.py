@@ -299,8 +299,8 @@ class Novel:
         folder = os.path.exists(file_path)
         if folder:
             return
-        content = content.replace(self.chapters[index]['title'], '').replace(
-            self.chapters[index]['title'].replace(' ', ''), '')
+        # content = content.replace(self.chapters[index]['title'], '').replace(
+        #     self.chapters[index]['title'].replace(' ', ''), '')
         _list = content.split('<br/>')
         contents = ''
         for item in _list:
