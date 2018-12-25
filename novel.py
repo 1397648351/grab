@@ -21,7 +21,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     novels = []
-    website = 3  # xiashu = 0, biquge = 1, aishu = 2, mianhuatang = 3
+    website = 1  # xiashu = 0, biquge = 1, aishu = 2, mianhuatang = 3
     down_mode = Novel.Normal
     mode = Novel.Search_Name
     driver_name = Novel.Chrome
@@ -52,8 +52,8 @@ if __name__ == "__main__":
                 novels.append(arg)
 
     # 自用
-    # else:
-    #     novels = [u'雪中悍刀行']
+    else:
+        novels = [u'赘婿']
 
     if not novels:
         name = raw_input(unicode('书名（多个以空格隔开）：', 'utf-8').encode('gbk'))
