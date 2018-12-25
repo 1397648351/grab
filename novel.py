@@ -52,8 +52,8 @@ if __name__ == "__main__":
                 novels.append(arg)
 
     # 自用
-    else:
-        novels = [u'赘婿']
+    # else:
+    #     novels = [u'赘婿']
 
     if not novels:
         name = raw_input(unicode('书名（多个以空格隔开）：', 'utf-8').encode('gbk'))
