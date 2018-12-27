@@ -1,4 +1,10 @@
+# !/usr/bin/env python
 # -*- coding: utf-8 -*-
+# ==================================================
+# @Time   : 2018/12/27 23:13
+# @Author : WuZe
+# @Desc   :
+# ==================================================
 
 import sys, os, time, re, threading, shutil, zipfile, zlib, json
 import novel_config as config
