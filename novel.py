@@ -11,9 +11,6 @@ import signal
 # import pyttsx3 as pyttsx
 from bizlayer.novel import Novel
 
-reload(sys)
-sys.setdefaultencoding("utf-8")
-
 
 # engine = pyttsx.init()
 # engine.setProperty('volume', 1.0)  # 音量
@@ -27,12 +24,12 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     novels = []
-    website = 1  # xiashu = 0, biquge = 1, aishu = 2, mianhuatang = 3
+    website = 1   # xiashu = 0, biquge = 1, aishu = 2, mianhuatang = 3
     down_mode = Novel.Normal
     mode = Novel.Search_Name
     driver_name = Novel.Chrome
     if len(sys.argv) > 1:
-        for i in xrange(1, len(sys.argv)):
+        for i in range(1, len(sys.argv)):
             arg = str(sys.argv[i])
             if arg.startswith('-'):
                 _arg = arg.lower()
@@ -48,30 +45,30 @@ if __name__ == "__main__":
                     elif re.match(r'[0-3]', se):
                         website = int(se)
                     else:
-                        print '\t', u'-n 更新或创建（默认）'
-                        print '\t', u'-r 替换或创建'
-                        print '\t', u'-c 使用Chrome浏览器（默认）'
-                        print '\t', u'-f 使用FireFox浏览器'
-                        print '\t', u'-[0-3] 下书网=0（默认）, 笔趣阁=1, 爱书网=2, 棉花糖=3'
+                        print('\t', '-n 更新或创建（默认）')
+                        print('\t', '-r 替换或创建')
+                        print('\t', '-c 使用Chrome浏览器（默认）')
+                        print('\t', '-f 使用FireFox浏览器')
+                        print('\t', '-[0-3] 下书网=0（默认）, 笔趣阁=1, 爱书网=2, 棉花糖=3')
                         sys.exit(0)
             else:
                 novels.append(arg)
 
     # 自用
-    # else:
-    #     novels = [u'赘婿']
+    else:
+        novels = ['赘婿']
 
     if not novels:
-        name = raw_input(unicode('书名（多个以空格隔开）：', 'utf-8').encode('gbk'))
+        name = input('书名（多个以空格隔开）：')
         novels = name.split(' ')
     for novel in novels:
-        if not isinstance(novel, unicode):
-            novel = unicode(novel, 'gbk')
-        # engine.say(u'开始抓取 %s' % novel)
+        # if not isinstance(novel, unicode):
+        #     novel = novel.decode('gbk')
+        # engine.say('开始抓取 %s' % novel)
         # engine.runAndWait()
         Novel(novel, mode, down_mode, website)
     if len(novels) > 0:
         path = os.path.abspath(os.path.join(sys.path[0], 'file/novel')) #, '%s.epub' % novels[0]
         os.system('explorer /e,"%s"' % path)
-    # engine.say(u'抓取完成')
+    # engine.say('抓取完成')
     # engine.runAndWait()

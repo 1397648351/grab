@@ -14,8 +14,6 @@ from email.mime.text import MIMEText
 from email.utils import parseaddr, formataddr
 import smtplib
 
-reload(sys)
-sys.setdefaultencoding('UTF-8')
 
 
 def _format_addr(s):
@@ -41,5 +39,5 @@ if __name__ == "__main__":
         server.login(from_addr, password)
         server.sendmail(from_addr, [to_addr], msg.as_string())
         server.quit()
-    except Exception, e:
-        print 'Exception: send email failed', e
+    except Exception as e:
+        print('Exception: send email failed', e)

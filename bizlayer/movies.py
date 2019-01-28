@@ -14,16 +14,13 @@ from lib.grab import Grab
 from lib.db import DB
 from pyquery import PyQuery as pq
 
-reload(sys)
-sys.setdefaultencoding('UTF-8')
-
 
 class Movies:
     def __init__(self):
         self.domain = 'https://www.dytt8.net'
         # self.url = '/html/gndy/dyzz/index.html'
         self.imgpath = 'E:/Project/PHP/bit/public/static/dist/images/movies'
-        self.async = 6
+        self.count_async = 6
         self.idList = []
         self.movies = []
         # self.sqlList = []
@@ -38,19 +35,19 @@ class Movies:
         ids = DB.fetchall("SELECT id from bs_movie")
         for id in ids:
             self.idList.append(str(id[0]))
-        print '正在抓取....'
+        print('正在抓取....')
         # self.makedir()
         if to == 0:
-            nums = xrange(limit)
+            nums = range(limit)
         else:
-            nums = xrange(limit, to + 1)
+            nums = range(limit, to + 1)
         threads = []
         for i in nums:
             url = self.domain + '/html/gndy/dyzz/list_23_%s.html' % (i + 1)
             th = threading.Thread(target=self.get_page, args=(url,))
             th.start()
             threads.append(th)
-            while len(threads) >= self.async / 2:
+            while len(threads) >= self.count_async / 2:
                 for j, _th in enumerate(threads):
                     if not _th.isAlive():
                         threads.pop(j).join()
@@ -60,24 +57,24 @@ class Movies:
                     threads.pop(i).join()
         threads = []
         num = len(self.movies)
-        print '共%s' % num
+        print('共%s' % num)
         for link in self.movies:
             th = threading.Thread(target=self.get_movie, args=(link,))
             th.start()
             threads.append(th)
-            while len(threads) >= self.async / 2:
+            while len(threads) >= self.count_async / 2:
                 for j, _th in enumerate(threads):
                     if not _th.isAlive():
                         threads.pop(j).join()
                         num = num - 1
-                        print '剩%s' % num
+                        print('剩%s' % num)
         while len(threads) > 0:
             for i, _th in enumerate(threads):
                 if not _th.isAlive():
                     threads.pop(i).join()
                     num = num - 1
-                    print '剩%s' % num
-        # print '正在入库....'
+                    print('剩%s' % num)
+        # print('正在入库....')
         # if len(self.sqlList) > 0:
         #     DB.doTrans(self.sqlList)
         DB.execute(
@@ -112,41 +109,41 @@ class Movies:
             doc = pq(html)
             info['download'] = doc('#Zoom table td:first-child').eq(0).text()
             name = doc('.bd3r .co_area2 .title_all h1').text()
-            info['name'] = re.search(ur'.*《(.*)》.*', name).group(1)
-            # name = re.search(ur'.*阳光电影www\.ygdy8\.com\.(\W*\d?)\..*', info['download']).group(1).strip()
+            info['name'] = re.search(r'.*《(.*)》.*', name).group(1)
+            # name = re.search(r'.*阳光电影www\.ygdy8\.com\.(\W*\d?)\..*', info['download']).group(1).strip()
             content = doc('#Zoom p:first-child')
             if not content:
                 return
             content = content.remove('br').html().replace('　', '')
-            pattern = re.compile(ur'.*◎年代.*(?:.*/)?(?P<date>\d{4}[-年]\d{2}[-月]\d{2}日?)\(.*')
+            pattern = re.compile(r'.*◎年代.*(?:.*/)?(?P<date>\d{4}[-年]\d{2}[-月]\d{2}日?)\(.*')
             res = re.match(pattern, content)
             if res:
                 info['date'] = res.group('date').strip().replace('年', '-').replace('月', '-').replace('日', '-')
-            pattern = re.compile(ur'.*◎豆瓣评分(?P<score>.*)/10 from .* users.*')
+            pattern = re.compile(r'.*◎豆瓣评分(?P<score>.*)/10 from .* users.*')
             res = re.match(pattern, content)
             if res:
-                info['score'] = res.group('score').strip()
+                info['score'] = res.group('score').strip().replace(',', '.')
                 if not info['score']:
                     info['score'] = '0'
             else:
-                pattern = re.compile(ur'.*◎IMDb评分(?P<score>.*)/10 from .* users.*', re.I)
+                pattern = re.compile(r'.*◎IMDb评分(?P<score>.*)/10 from .* users.*', re.I)
                 res = re.match(pattern, content)
                 if res:
-                    info['score'] = res.group('score').strip()
+                    info['score'] = res.group('score').strip().replace(',', '.')
                     if not info['score']:
                         info['score'] = '0'
-            pattern = re.compile(ur'.*◎简介(?P<introduction>.*)◎获奖情况.*<img.*')
+            pattern = re.compile(r'.*◎简介(?P<introduction>.*)◎获奖情况.*<img.*')
             res = re.match(pattern, content)
             if res:
                 info['introduction'] = res.group('introduction').strip().replace('\'', '\\\'')
             else:
-                pattern = re.compile(ur'.*◎简介(?P<introduction>.*).*<img.*')
+                pattern = re.compile(r'.*◎简介(?P<introduction>.*).*<img.*')
                 res = re.match(pattern, content)
                 if res:
                     info['introduction'] = res.group('introduction').strip().replace('\'', '\\\'')
             if len(info['introduction']) >= 1024:
                 info['introduction'] = ''
-            # print info['introduction'], url
+            # print(info['introduction'], url)
             # return
             sql = "select * from bs_movie where name='%s' or id='%s'" % (info['name'], info['id'])
             res = DB.fetchone(sql)
@@ -165,18 +162,18 @@ class Movies:
                 sql = "insert into bs_movie (id,name,date,score,introduction,url,download) values ('%s','%s',NULL,'%s','%s','%s','%s')" % (
                     info['id'], info['name'], info['score'], info['introduction'], url,
                     info['download'])
-            # print sql
+            # print(sql)
             sqlList.append(sql)
             if len(sqlList) == 1:
                 DB.execute(sqlList[0])
             else:
                 DB.doTrans(sqlList)
             # self.sqlList.append(sql)
-        except Exception, ex:
-            print str(ex), url
+        except Exception as ex:
+            print(str(ex), url)
 
 
 if __name__ == "__main__":
     m = Movies()
-    m.run(11, 50)
+    m.run(51, 186)
     # m.get_movie('https://www.dytt8.net/html/gndy/dyzz/20170414/53727.html')

@@ -10,9 +10,6 @@ import sys, os, re, time, threading
 from lib.grab import Grab
 from pyquery import PyQuery as pq
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
 
 class Xiezhen:
     kinds = {
@@ -39,15 +36,15 @@ class Xiezhen:
         self.threads = []
         self.total = 0
         self.index = 0
-        self.async = 8
+        self.count_async = 8
         self.mutex = threading.RLock()
         self.run = True
 
     def start(self):
-        print u'正在获取图片资源...'
+        print(u'正在获取图片资源...')
         self.get_pages()
-        print u'共计%d项，%d张。' % (len(self.items), self.total)
-        print u'开始下载....'
+        print(u'共计%d项，%d张。' % (len(self.items), self.total))
+        print(u'开始下载....')
         self.download_items()
         self.run = False
 
@@ -58,9 +55,9 @@ class Xiezhen:
         pages = []
         threads = []
         if self.to != 0:
-            pages = xrange(self.limit - 1, self.to)
+            pages = range(self.limit - 1, self.to)
         else:
-            pages = xrange(self.limit)
+            pages = range(self.limit)
         for page in pages:
             if not self.run:
                 break
@@ -71,7 +68,7 @@ class Xiezhen:
             th.start()
             threads.append(th)
             # self.get_page_items(self.url + url)
-            while len(threads) >= self.async / 2:
+            while len(threads) >= self.count_async / 2:
                 for i, _th in enumerate(threads):
                     if not _th.isAlive():
                         threads.pop(i).join()
@@ -84,12 +81,12 @@ class Xiezhen:
     def get_page_items(self, url):
         try:
             html = Grab.get_content(url).decode('gb2312', 'ignore')
-        except Exception, e:
-            print '\r' + str(e), url,
+        except Exception as e:
+            print('\r' + str(e), url,)
             sys.stdout.flush()
             if self.run:
                 time.sleep(.1)
-                self.get_page(url)
+                self.get_page_items(url)
                 return
         html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
             'xmlns="http://www.w3.org/1999/xhtml"', '')
@@ -103,7 +100,7 @@ class Xiezhen:
             th = threading.Thread(target=self.get_item_info, args=(href,))
             th.start()
             threads.append(th)
-            while len(threads) >= self.async / 2:
+            while len(threads) >= self.count_async / 2:
                 for i, _th in enumerate(threads):
                     if not _th.isAlive():
                         threads.pop(i).join()
@@ -112,8 +109,8 @@ class Xiezhen:
     def get_item_info(self, url):
         try:
             html = Grab.get_content(url).decode('gb2312', 'ignore')
-        except Exception, e:
-            print '\r' + str(e), url,
+        except Exception as e:
+            print('\r' + str(e), url,)
             sys.stdout.flush()
             if self.run:
                 time.sleep(.1)
@@ -131,7 +128,7 @@ class Xiezhen:
         if matchObj:
             info['id'] = matchObj.group(1)
         count = doc('.content-page span:first').text().strip()
-        matchObj = re.match(ur'共([0-9]+)页', count)
+        matchObj = re.match(r'共([0-9]+)页', count)
         if matchObj:
             info['count'] = int(matchObj.group(1))
         self.mutex.acquire()
@@ -150,13 +147,13 @@ class Xiezhen:
         for index, item in enumerate(self.items):
             if not self.run:
                 break
-            for i in xrange(item['count']):
+            for i in range(item['count']):
                 if not self.run:
                     break
                 th = threading.Thread(target=self.download_img, args=(index, i + 1,))
                 th.start()
                 self.threads.append(th)
-                while len(self.threads) >= self.async:
+                while len(self.threads) >= self.count_async:
                     for j, _th in enumerate(self.threads):
                         if not _th.isAlive():
                             self.threads.pop(j).join()
@@ -177,7 +174,7 @@ class Xiezhen:
             self.mutex.acquire()
             self.index += 1
             percent = self.index * 100.0 / self.total
-            print '\r%.2f%%' % percent,
+            print('\r%.2f%%' % percent,)
             sys.stdout.flush()
             self.mutex.release()
         except Exception:

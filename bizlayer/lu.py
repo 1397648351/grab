@@ -6,14 +6,10 @@
 # @Desc   :
 # ==================================================
 
-import sys
 import os
 import threading
 from pyquery import PyQuery as pq
 from lib.grab import Grab
-
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 
 class Lu:
@@ -37,7 +33,7 @@ class Lu:
         self.mutex.release()
 
     def getpages(self):
-        for i in xrange(self.start, self.end + 1):
+        for i in range(self.start, self.end + 1):
             if i == 1:
                 url = "%s/list/%d.html" % (self.homepage, self.type)
             else:
@@ -92,4 +88,4 @@ class Lu:
             thradList.append(th)
         while len(thradList) > 0:
             thradList.pop(0).join()
-        print '%s %s 完成！' % (id, name)
+        print('%s %s 完成！' % (id, name))

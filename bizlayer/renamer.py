@@ -8,9 +8,6 @@
 
 import sys, os, threading
 
-reload(sys)
-sys.setdefaultencoding("utf-8")
-
 
 class Renamer:
     def __init__(self):

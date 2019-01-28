@@ -7,13 +7,12 @@
 # ==================================================
 
 import sys, os, time, re, threading, shutil, zipfile, zlib, json
-import novel_config as config
+
+sys.path.append("..")
+import bizlayer.novel_config as config
 from selenium import webdriver
 from pyquery import PyQuery as pq
 from lib.grab import Grab
-
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 
 class Novel:
@@ -42,8 +41,9 @@ class Novel:
         self.str_replace = config.str_replace
         if os.path.exists(os.path.join(sys.path[0], 'novel.json')):
             with open(os.path.join(sys.path[0], 'novel.json')) as f:
-                conf = json.loads(f.read().decode('utf-8'))
-                if conf.has_key('str_replace'):
+                # conf = json.loads(f.read().decode('utf-8'))
+                conf = json.loads(f.read())
+                if 'str_replace' in conf:
                     self.str_replace = self.str_replace + conf['str_replace']
         self.template = os.path.abspath(os.path.join(sys.path[0], 'template/epub'))
         self.creator = ""
@@ -62,12 +62,17 @@ class Novel:
             self.get_book(book)
 
     def get_book(self, bookname):
-        if not isinstance(bookname, unicode):
-            bookname = unicode(bookname, 'utf-8')
+        # if not isinstance(bookname, unicode):
+        #     bookname = unicode(bookname, 'utf-8')
         if self.driverName == self.Chrome:
-            self.driver = webdriver.Chrome()
+            chrome_opt = webdriver.ChromeOptions()
+            prefs = {'profile.managed_default_content_settings.images': 2}
+            chrome_opt.add_experimental_option('prefs', prefs)
+            self.driver = webdriver.Chrome(chrome_options=chrome_opt)
         elif self.driverName == self.FireFox:
-            self.driver = webdriver.Firefox()
+            firefox_profile = webdriver.FirefoxProfile()
+            firefox_profile.set_preference('permissions.default.image', 2)
+            self.driver = webdriver.Firefox(firefox_profile)
         elif self.driverName == self.Edge:
             self.driver = webdriver.Edge()
         elif self.driverName == self.Ie:
@@ -80,8 +85,8 @@ class Novel:
             input.send_keys(bookname)
             submit = self.driver.find_element_by_id(self.settings['book']['submit'])
             submit.click()
-            html = self.driver.page_source.decode('utf-8', 'ignore')
-            # html = self.driver.page_source.decode(self.settings['decode'], 'ignore')
+            # html = self.driver.page_source.decode('utf-8', 'ignore')
+            html = self.driver.page_source
             html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
                 'xmlns="http://www.w3.org/1999/xhtml"', '')
             doc = pq(html)
@@ -91,14 +96,14 @@ class Novel:
                 self.bookname = link.text().strip()
                 if bookname != self.bookname:
                     self.driver.quit()
-                    print u'未找到该书籍《%s》' % bookname
+                    print('未找到该书籍《%s》' % bookname)
                     return
                 self.bookid = link.attr('href').replace(self.settings['book']['link_replace'], '')
                 self.url_page = '%s/%s/' % (self.settings['home'], self.bookid)
                 self.get_chapters()
-        except Exception, ex:
+        except Exception as ex:
             self.driver.quit()
-            print 'error!', '\n', str(ex)
+            print('error!', '\n', str(ex))
             return
 
     def get_chapters(self, url=None):
@@ -116,11 +121,11 @@ class Novel:
             if self.settings['page']['do']:
                 self.settings['page']['do'](self.driver)
             html = self.driver.page_source
-            html = html.decode('utf-8', 'ignore')
+            # html = html.decode('utf-8', 'ignore')
             html = html.replace('xmlns="http://www.w3.org/1999/xhtml" /', '').replace(
                 'xmlns="http://www.w3.org/1999/xhtml"', '')
-        except Exception, ex:
-            print 'error!', '\n', str(ex)
+        except Exception as ex:
+            print('error!', '\n', str(ex))
             return
         finally:
             self.driver.quit()
@@ -138,7 +143,7 @@ class Novel:
         self.creator = doc(self.settings['page']['creator']).text().strip()
         if not self.bookname:
             raise Exception('抓取网页失败！')
-        print "《%s》开始抓取" % self.bookname
+        print("《%s》开始抓取" % self.bookname)
         self.create_path()
         _list = introduction.split('<br/>')
         for item in _list:
@@ -206,7 +211,7 @@ class Novel:
                 percent = self.num * 100.0 / len(self.chapters)
                 _str = '%s [%.2f%%] (%d/%d) %d 已存在！' % (self.bookname, percent, self.num, len(self.chapters), index)
                 # _str = '%s [%.2f%%] %s 已存在！' % (self.bookname, percent, self.chapters[index]["title"])
-                print '\r%s' % _str,
+                print('\r%s' % _str, )
                 sys.stdout.flush()
                 self.mutex.release()
                 return
@@ -216,10 +221,10 @@ class Novel:
             if self.settings['chapter']['gzip']:
                 html = zlib.decompress(html, zlib.MAX_WBITS | 16)
             html = html.decode(self.settings['decode'], 'ignore')
-        except Exception, e:
+        except Exception as e:
             self.mutex.acquire()
             # print '\r%s %s ' % (_url, e.message),
-            print '%s %s' % (_url, e.message)
+            print('%s %s' % (_url, str(e)))
             sys.stdout.flush()
             self.mutex.release()
             time.sleep(1)
@@ -269,33 +274,33 @@ class Novel:
             content_opf_2 = content_opf_2 + '<itemref idref="id' + _name + '"/>'
         bookdirpath = os.path.join(self.path, self.bookname)
         file_name = os.path.join(bookdirpath, 'catalog.xhtml')
-        with open(os.path.join(self.template, 'temp_catalog.xhtml'), 'r') as f:
+        with open(os.path.join(self.template, 'temp_catalog.xhtml'), 'r', encoding='utf-8') as f:
             content = f.read().replace('__CONTENT__', content)
-        with open(file_name, 'w') as f:
+        with open(file_name, 'w', encoding='utf-8') as f:
             f.write(content)
         file_name = os.path.join(bookdirpath, 'toc.ncx')
-        with open(os.path.join(self.template, 'temp_toc.ncx'), 'r') as f:
+        with open(os.path.join(self.template, 'temp_toc.ncx'), 'r', encoding='utf-8') as f:
             content_toc = f.read().replace('__CONTENT__', content_toc).replace('__TIME__', id).replace(
                 '__CREATOR__', self.creator).replace('__BOOKNAME__', self.bookname)
-        with open(file_name, 'w') as f:
+        with open(file_name, 'w', encoding='utf-8') as f:
             f.write(content_toc)
         file_name = os.path.join(bookdirpath, 'content.opf')
-        with open(os.path.join(self.template, 'temp_content.opf'), 'r') as f:
+        with open(os.path.join(self.template, 'temp_content.opf'), 'r', encoding='utf-8') as f:
             content_opf = f.read()
             content_opf = content_opf.replace('__BOOKNAME__', self.bookname).replace('__CREATOR__',
                                                                                      self.creator).replace(
                 '__TIME__', id).replace('__CONTENT1__', content_opf_1).replace('__CONTENT2__', content_opf_2)
-        with open(file_name, 'w') as f:
+        with open(file_name, 'w', encoding='utf-8') as f:
             f.write(content_opf)
 
     def create_page(self):
-        with open(os.path.join(self.template, 'temp_page.xhtml'), 'r') as f:
+        with open(os.path.join(self.template, 'temp_page.xhtml'), 'r', encoding='utf-8') as f:
             content = f.read()
         content = content.replace('__BOOKNAME__', self.bookname).replace(
             '__INTRODUCTION__', self.introduction).replace('__CREATOR__', self.creator)
         bookdirpath = os.path.join(self.path, self.bookname)
         file_name = os.path.join(bookdirpath, 'page.xhtml')
-        with open(file_name, 'w') as f:
+        with open(file_name, 'w', encoding='utf-8') as f:
             f.write(content)
 
     def create_chapter(self, index, content):
@@ -322,16 +327,16 @@ class Novel:
                 contents = contents.replace(item, '')
             else:
                 contents, num = re.subn(item[0], item[1], contents, flags=re.M)
-        with open(os.path.join(self.template, 'temp_chapter.xhtml'), 'r') as f:
+        with open(os.path.join(self.template, 'temp_chapter.xhtml'), 'r', encoding='utf-8') as f:
             contents = f.read().replace('__CONTENT__', contents).replace('__TITLE__', self.chapters[index]['title'])
-        with open(file_path, 'w') as f:
+        with open(file_path, 'w', encoding='utf-8') as f:
             f.write(contents)
         self.mutex.acquire()
         self.num += 1
         percent = self.num * 100.0 / len(self.chapters)
         _str = '%s [%.2f%%] (%d/%d) %d %s' % (
             self.bookname, percent, self.num, len(self.chapters), index, self.chapters[index]["title"])
-        print '\r%s' % _str
+        print('\r%s' % _str)
         sys.stdout.flush()
         self.mutex.release()
 
@@ -347,4 +352,4 @@ class Novel:
         with zipfile.ZipFile(bookpath, 'a') as file:
             file.write(os.path.join(self.template, 'mimetype'), 'mimetype')
         shutil.rmtree(bookdirpath)  # 递归删除文件夹
-        print '\r%s.epub 完成' % self.bookname
+        print('\r%s.epub 完成' % self.bookname)

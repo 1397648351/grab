@@ -11,8 +11,6 @@ import zlib
 from pyquery import PyQuery as pq
 from lib.grab import Grab
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 # html = Grab.get_content('http://www.qiushu.cc/t/76658/23612976.html')
 html = Grab.get_content('https://www.xiashu.la/28501/read_2.html')
@@ -33,4 +31,4 @@ for p in ps:
     p = p.strip()
     if not p:
         continue
-    print p
+    print(p)

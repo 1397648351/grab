@@ -27,7 +27,7 @@ SAVE_PATH = 'file/novel'
 
 settings = [
     {
-        'home': 'https://www.xiashu.la',
+        'home': 'https://www.xiashu.cc',
         'decode': 'utf-8',
         'book': {
             'input': 'shuming',
@@ -181,5 +181,5 @@ str_replace = [
     '.co', 'tyjiao', 'tangkx', 'js518pinwenba', 'jlgxhqpinwenba', 'jiaoyu123', 'yacht4s',
     'hotensharepinwenba', 'hotenshare', 'pinwenba', 'weibogg', '【品-文-吧】', 'read3();',
     'ｗww.ranwen.orｇ?', '手机用户请浏览阅读，更优质的阅读体验。',
-    [ur'(?<=[。，”！？]).{1,16}最新章节', ur''], [ur'<p>.{1,16}最新章节</p>', ur'']
+    [r'(?<=[。，”！？]).{1,16}最新章节', r''], [r'<p>.{1,16}最新章节</p>', r'']
 ]

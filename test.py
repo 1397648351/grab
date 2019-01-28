@@ -14,22 +14,24 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-reload(sys)
-sys.setdefaultencoding('UTF-8')
-
 try:
-    driver = webdriver.Chrome()
-    driver.get('https://www.baidu.com')
-    WebDriverWait(driver, 30, .5).until(EC.presence_of_all_elements_located((By.ID, "kw")))
-    input = driver.find_element(By.ID, 'kw')
+    chrome_opt = webdriver.ChromeOptions()
+    prefs = {'profile.managed_default_content_settings.images': 2}
+    chrome_opt.add_experimental_option('prefs', prefs)
+    driver = webdriver.Chrome(chrome_options=chrome_opt)
+
+    driver.get('https://www.biquge5200.cc')
+    WebDriverWait(driver, 15, .5).until(EC.presence_of_element_located((By.ID, "sss")))
+    print("OK!")
+    input = driver.find_element(By.ID, 'wd')
     input.send_keys(u"我的天")
     input.send_keys(Keys.ENTER)
-    try:
-        WebDriverWait(driver, 30, .5).until(EC.presence_of_all_elements_located((By.ID, "1")))
-    except:
-        print("ele can't find")
-        exit(0)
-    driver.find_element(By.ID, '1').find_element(By.CSS_SELECTOR, '.t a').click()
+    # try:
+    #     WebDriverWait(driver, 15, .5).until(EC.presence_of_element_located((By.ID, "1")))
+    # except:
+    #     print("ele can't find")
+    #     exit(0)
+    # driver.find_element(By.ID, '1').find_element(By.CSS_SELECTOR, '.t a').click()
     # driver.find_element(By.ID, "su").click()
     # driver.execute_script("window.open('https://www.taobao.com')")
     # driver.switch_to.window(driver.window_handles[0])
