@@ -49,7 +49,7 @@ if __name__ == "__main__":
                         print('\t', '-r 替换或创建')
                         print('\t', '-c 使用Chrome浏览器（默认）')
                         print('\t', '-f 使用FireFox浏览器')
-                        print('\t', '-[0-3] 下书网=0（默认）, 笔趣阁=1, 爱书网=2, 棉花糖=3')
+                        print('\t', '-[0-3] 笔趣阁=0（默认）, 爱书网=1, 棉花糖=2, 80电子书=3')
                         sys.exit(0)
             else:
                 novels.append(arg)
