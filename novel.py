@@ -24,7 +24,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     novels = []
-    website = 1   # xiashu = 0, biquge = 1, aishu = 2, mianhuatang = 3
+    website = 2   # biquge = 0, aishu = 1, mianhuatang = 2, blvo = 3
     down_mode = Novel.Normal
     mode = Novel.Search_Name
     driver_name = Novel.Chrome
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     # 自用
     else:
-        novels = ['赘婿']
+        novels = ['超神建模师']
 
     if not novels:
         name = input('书名（多个以空格隔开）：')

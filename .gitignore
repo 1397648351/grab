@@ -1,6 +1,7 @@
 .idea
 file
 *.pyc
+log
 *.log
 *.spec
 dist

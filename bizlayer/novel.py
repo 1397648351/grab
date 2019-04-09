@@ -25,7 +25,7 @@ class Novel:
     Edge = 2
     Ie = 3
 
-    def __init__(self, book, mode=Search_ID, download_mode=Normal, website=config.xiashu, driver_name=Chrome):
+    def __init__(self, book, mode=Search_ID, download_mode=Normal, website=config.biquge, driver_name=Chrome):
         self.version = '1.0'
         self.mutex = threading.Lock()
         self.coexist = 5

@@ -17,41 +17,14 @@ def ele_click(driver):
         time.sleep(0.1)
 
 
-xiashu = 0
-biquge = 1
-aishu = 2
-mianhuatang = 3
-blvo = 4
+biquge = 0
+aishu = 1
+mianhuatang = 2
+blvo = 3
 
 SAVE_PATH = 'file/novel'
 
 settings = [
-    {
-        'home': 'https://www.xiashu.cc',
-        'decode': 'utf-8',
-        'book': {
-            'input': 'shuming',
-            'submit': 'submitbtn',
-            'link': '#waterfall .item.masonry-brick',
-            'href': '.title h3 a',
-            'link_replace': '/api/ajax/searchid.php?id='
-        },
-        'page': {
-            'rm_eles': ['#aboutbook a.fr', '#aboutbook h3'],
-            'do': ele_click,
-            'name': '#info .infotitle h1',
-            'introduction': '#aboutbook',
-            'creator': '.ainfo .username a',
-            'cover': '#picbox .img_in img',
-            'chapters': '#detaillist ul li',
-            'link_concat': True
-        },
-        'chapter': {
-            'rm_eles': ['#chaptercontent #tac'],
-            'content': '#chaptercontent',
-            'gzip': False
-        },
-    },
     {
         'home': 'https://www.biquge5200.cc',
         'decode': 'gbk',
