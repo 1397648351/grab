@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     # 自用
     else:
-        novels = ['超神建模师']
+        novels = ['星战风暴']
 
     if not novels:
         name = input('书名（多个以空格隔开）：')

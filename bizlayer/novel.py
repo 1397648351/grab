@@ -12,7 +12,7 @@ sys.path.append("..")
 import bizlayer.novel_config as config
 from selenium import webdriver
 from pyquery import PyQuery as pq
-from lib.grab import Grab
+from common.spider import Spider
 
 
 class Novel:
@@ -154,7 +154,7 @@ class Novel:
                 continue
             self.introduction += item + '<br/>'
         cover = doc(self.settings['page']['cover']).attr('src')
-        Grab.download_image(cover, os.path.join(self.path, self.bookname), 'cover')
+        Spider.download_image(cover, os.path.join(self.path, self.bookname), 'cover')
         list_chapter = doc(self.settings['page']['chapters']).items()
         index = 0
         for chapter in list_chapter:
@@ -217,7 +217,7 @@ class Novel:
                 return
             if self.settings['page']['link_concat']:
                 _url = self.settings['home'] + url
-            html = Grab.get_content(_url)
+            html = Spider.get_content(_url)
             if self.settings['chapter']['gzip']:
                 html = zlib.decompress(html, zlib.MAX_WBITS | 16)
             html = html.decode(self.settings['decode'], 'ignore')
